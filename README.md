@@ -1,5 +1,5 @@
-### 1.	Introduction - Reporting Framework
-Document is to present the MOSIP reporting framework set-up and deployment. Reporting framework uses below tool for real-time straming data and visualization.
+### 1.	Introduction - Reference Reporting Framework
+Document is to present the MOSIP reference reporting framework set-up and deployment. Reporting framework uses below tool for real-time straming data and visualization.
 ##### * Postgres for MOSIP data source enabled with binary or write ahead logs
 ##### * Debezium for change data capture from postgres, This is used along with Kafka connect as plugin
 ##### * Kafka connect to connect data source and stream data
@@ -8,7 +8,7 @@ Document is to present the MOSIP reporting framework set-up and deployment. Repo
 ##### * Spark streaming to process the data received from kafka topic in real-time
 ##### * Spark uses pyspark for data processing and processing job are written in python.
 ##### * Elastic search as data-index and persistance store
-##### * Kibana as visualization to create and view dashboards and reports.
+##### * Kibana as visualization to create and view dashboards and reports. Reference dashboards and reports are provided as part of this deployment.
           
 
 ### 2.	Deployment of Elasticsearch and Kibana
