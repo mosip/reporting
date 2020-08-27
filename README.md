@@ -8,40 +8,40 @@ Document is to present the MOSIP reporting framework deployment. MOSIP as a plat
 
 #### b.	Elasticsearch Installation and Set-up
 #####	1.	Create a file called "`elasticsearch.repo`" in the "`/etc/yum.repos.d/`"
-			$cd /etc/yum.repos.d/
-			$vi elasticsearch.repo
+		$cd /etc/yum.repos.d/
+		$vi elasticsearch.repo
 
 #####	2. Copy below content on to "`elasticsearch.repo`" file
 
-			[elasticsearch-7.x]
-			name=Elasticsearch repository for 7.x packages
-			baseurl=https://artifacts.elastic.co/packages/7.x/yum
-			gpgcheck=1
-			gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-			enabled=1
-			autorefresh=1
-			type=rpm-md
+		[elasticsearch-7.x]
+		name=Elasticsearch repository for 7.x packages
+		baseurl=https://artifacts.elastic.co/packages/7.x/yum
+		gpgcheck=1
+		gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+		enabled=1
+		autorefresh=1
+		type=rpm-md
 
 #####	3. Run command to install elastic search
-        	$sudo yum install elasticsearch            
-        	$sudo chkconfig --add elasticsearch
+        $sudo yum install elasticsearch            
+        $sudo chkconfig --add elasticsearch
 
 #####	4. Update `elasticsearch.yml` from `/etc/elasticsearch/`
-			network.host: xxx.xx.xx.xx <Internal_ip>
-			http.port: 9200
-			discovery.seed_hosts: ["xxx.xx.xxx.xx", "*.*.*.*", "host1", "host2"]
-			discovery.type: single-node
+		network.host: xxx.xx.xx.xx <Internal_ip>
+		http.port: 9200
+		discovery.seed_hosts: ["xxx.xx.xxx.xx", "*.*.*.*", "host1", "host2"]
+		discovery.type: single-node
 
 #####	5. Start elastic search using below command
-			$sudo -i service elasticsearch start
+		$sudo -i service elasticsearch start
 
 #####	6. Log file in "`/var/log/elasticsearch/`"
 
 #####	7. Test elastic search with command curl -X GET "<internal_ip>:9200/?pretty"
-              Example: $curl -X GET “xxx.xx.x.x:9200/?pretty”
+		Example: $curl -X GET “xxx.xx.x.x:9200/?pretty”
 
 #####	8. Elastic Search URL http://<public_ip>:9200
-			Example: http://xxx.xx.xxx.xx:9200/
+		Example: http://xxx.xx.xxx.xx:9200/
 
 #### c.	Kibana Installation and Set-up
 
