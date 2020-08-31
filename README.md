@@ -172,7 +172,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #####	3. Download debezium postgres connectors plugin and extract.
 		$cd /home/madmin/Debezium
-		$wget https://repo1.maven.org/maven2/io/debezium/debezium-connector-     postgres/1.2.0.Final/debezium-connector-postgres-1.2.0.Final-plugin.tar.gz
+		$wget https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/1.2.0.Final/debezium-connector-postgres-1.2.0.Final-plugin.tar.gz
 		$tar -zxvf debezium-connector-postgres-1.2.0.Final-plugin.tar.gz
 		$cd debezium-connector-postgres
 
