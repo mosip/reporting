@@ -1,5 +1,5 @@
 ### 1.	Introduction - Reference Reporting Framework
-Document is to present the MOSIP reference reporting framework set-up and deployment. Reporting framework uses below tool for real-time straming data and visualization.
+Document is to present the MOSIP reference reporting framework set-up and deployment. Reporting framework uses below tool for real-time streaming data and visualization.
 ##### * Postgres for MOSIP data source enabled with binary or write ahead logs
 ##### * Debezium for change data capture from postgres, This is used along with Kafka connect as plugin
 ##### * Kafka connect to connect data source and stream data
@@ -7,7 +7,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 ##### * Zookepere for Kafka broakers co-ordination of the jobs
 ##### * Spark streaming to process the data received from kafka topic in real-time
 ##### * Spark uses pyspark for data processing and processing job are written in python.
-##### * Elastic search as data-index and persistance store
+##### * Elastic search as data-index and persistence store
 ##### * Kibana as visualization to create and view dashboards and reports. Reference dashboards and reports are provided as part of this deployment.
           
 
@@ -15,7 +15,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #### a.	Java Installation
 		$sudo yum install java
 
-#### b.	Elasticsearch Installation and Set-up
+#### b.	ElasticSearch Installation and Set-up
 #####	1.	Create a file called "`elasticsearch.repo`" in the "`/etc/yum.repos.d/`"
 		$cd /etc/yum.repos.d/
 		$vi elasticsearch.repo
@@ -152,7 +152,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #####	4. Start Kafka broaker
 		$bin/kafka-server-start.sh config/server.properties &
 
-#####	5. Quick test of Kafka broaker by creating topic, producing and consuming messages (optional)
+#####	5. Quick test of Kafka broaker by creating topic, producing and consuming messages *(optional)*
 		$bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 –topic test-topic
 		$bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 		$bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic test-topic
@@ -162,7 +162,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #### 3.	Set-up Kafka Connect with Debezium plugin
 
-#####	1. Install pgoutput plugin.
+#####	1. Install pgoutput plugin with postgres server.
 		By default it is available with 10+ postgres version
 		
 #####	2. Configure postgres and set wal_level for logical decoding with the write-ahead log
@@ -259,8 +259,6 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #####	4. Run spark streaming jobs using below command
 		$cd /home/madmin/spark/spark-2.4.6-bin-hadoop2.7/
 
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-ida.py localhost:9092 REPORTING-SERVER.ida.auth_transaction &
-	
 		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-audit.py localhost:9092 REPORTING-SERVER.audit.app_audit_log &
 	
 		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-ida.py localhost:9092 REPORTING-SERVER.ida.auth_transaction &
@@ -283,14 +281,15 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 		$bin/connect-standalone.sh config/connect-standalone.properties connector/connector-audit.properties connector/connector-ida.properties connector/connector-prereg.properties connector/connector-regclient.properties connector/connector-reg.properties &
 			
 #### 4.	Deploy Kibana Dashboard and reference Reports
-#####	1. Copy reference dashboard and report file from git repository (reporting/reporting-framework/mosip-ref-dashboard/mosip-dashboards.ndjson) to local where you are accessing kibana using browser.
+#####	1. Copy reference dashboard and report file from git repository (reporting/reporting-framework/mosip-ref-dashboard/mosip-dashboards.ndjson, mosip-reports.ndjson) to local where you are accessing kibana using browser.
 
-#####	2. Load mosip-dashboards.ndjson on to kibana using below steps
+#####	2. Load mosip-dashboards.ndjson, mosip-reports.ndjson on to kibana using below steps
 		1.	Login to kibana
 		2.	Go to left top menu and select Stack Management
 		3.	Select saved objects under kibana section 
 		4.	Top right click on Import 
 		5.	Select mosip-dashboards.ndjson and click on import
+		6.	Select mosip-reports.ndjson and click on import
 
 #####	3. Go to Kibana dashboards and check all the dashboards are visible
 
