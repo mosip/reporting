@@ -1,3 +1,16 @@
+#-- -----------------------------------------------------------------------------------------
+#-- Job Name        : Pre Registration DB Streaming
+#-- DB Name 	    : Pre-Reg DB
+#-- Purpose    	    : Job connects to kafka topic and stream data in real time and process the data, then index data on to elastic search index
+#--           
+#-- Create By       : Sadanandegowda DM
+#-- Created Date    : Aug-2019
+#-- 
+#-- Modified Date        Modified By         Comments / Remarks
+#-- ------------------------------------------------------------------------------------------
+#-- 
+#-- ------------------------------------------------------------------------------------------
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
