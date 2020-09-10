@@ -1,7 +1,7 @@
 #-- -----------------------------------------------------------------------------------------
 #-- Job Name        : Registration DB Streaming
 #-- DB Name 	    : RegPrc DB
-#-- Purpose    	    : Job connects to kafka topic and stream data in real time and process and index data on to elastic search index
+#-- Purpose    	    : Job connects to kafka topic and stream data in real time and process the data, then index data on to elastic search index
 #--           
 #-- Create By       : Sadanandegowda DM
 #-- Created Date    : Aug-2019
