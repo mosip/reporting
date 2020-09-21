@@ -9,7 +9,8 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 ##### * Spark uses pyspark for data processing and processing job are written in python.
 ##### * Elastic search as data-index and persistence store
 ##### * Kibana as visualization to create and view dashboards and reports. Reference dashboards and reports are provided as part of this deployment.
-          
+
+![MOSIP Reference Reporting Architecture](_reporting-framework/reporting-architecture.png)   
 
 ### 2.	Deployment of Elasticsearch and Kibana
 #### a.	Java Installation
@@ -82,8 +83,31 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 		$sudo -i service kibana start
 
 #####   7. Kibana URL `http://xxx.xx.xxx.xx:5601`
+
+#### d.	Logstash Installation and Set-up
+
+#####   1. Create a file called "`logstash.repo`" in the "`/etc/yum.repos.d/`"
+		$cd /etc/yum.repos.d/
+		$vi logstash.repo
+
+#####   2. Copy below content on to "`logstash.repo`" file
+
+		[logstash-7.x]
+		name=Elastic repository for 7.x packages
+		baseurl=https://artifacts.elastic.co/packages/7.x/yum
+		gpgcheck=1
+		gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+		enabled=1
+		autorefresh=1
+		type=rpm-md
 	
-#### d.	Setting-up Security and Authentication
+#####	3. Run command to install Kibana "sudo yum install logstash"
+		$sudo yum install logstash
+
+#####   4. Copy	"postgresql-42.2.14.jar" in to below location - Note: download jar using curl on to server
+			/usr/share/logstash/logstash-core/lib/jars/
+	
+#### e.	Setting-up Security and Authentication
 #####	1. Install x-pack security plugin
 		It is installed with elastic by default with latest version of elastic search
 
@@ -293,6 +317,18 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #####	3. Go to Kibana dashboards and check all the dashboards are visible
 
+
+#### 5.	Deploy logstash pipelines
+#####	1. Copy logstash pipeline configs from repo (reporting/reporting-framework/logstah-config/*) to server where logstash is running to below directory.
+			/usr/share/logstash/config-directory -- Create directory if not exist
+
+#####	2. Make required changes in the config files like db connection url, username, password, elastic search host, port...etc.
+
+#####	3. Run logstash pipelines using below command.
+			$cd /usr/share/logstash
+			$/bin/logstash -f config-directory &
+			
+#####	4. Check for records are storing on to index in elastic search.	
 
 ### 5.	Testing end to end Reporting Framework
 #### 1.	Test Postgres server and load data
