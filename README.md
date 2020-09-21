@@ -10,7 +10,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 ##### * Elastic search as data-index and persistence store
 ##### * Kibana as visualization to create and view dashboards and reports. Reference dashboards and reports are provided as part of this deployment.
 
-![MOSIP Reference Reporting Architecture](_reporting-framework/reporting-architecture.png)   
+![MOSIP Reference Reporting Architecture](reporting-framework/reporting-architecture.png)   
 
 ### 2.	Deployment of Elasticsearch and Kibana
 #### a.	Java Installation
