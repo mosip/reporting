@@ -7,6 +7,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 ##### * Zookepere for Kafka broakers co-ordination of the jobs
 ##### * Spark streaming to process the data received from kafka topic in real-time
 ##### * Spark uses pyspark for data processing and processing job are written in python.
+##### * Logstash is part of elastic stack and used to crawl data from database transform and index to elastic search (Batch processing). Logstash is not required if Debezium, Kafka and spark used (real-time processing).
 ##### * Elastic search as data-index and persistence store
 ##### * Kibana as visualization to create and view dashboards and reports. Reference dashboards and reports are provided as part of this deployment.
 
@@ -84,7 +85,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #####   7. Kibana URL `http://xxx.xx.xxx.xx:5601`
 
-#### d.	Logstash Installation and Set-up
+#### d.	Logstash Installation and Set-up (Optional: Not required for real-time processing) for Batch Data Processing.
 
 #####   1. Create a file called "`logstash.repo`" in the "`/etc/yum.repos.d/`"
 		$cd /etc/yum.repos.d/
