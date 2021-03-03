@@ -16,7 +16,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 ##### * Debezium for change data capture from postgres, This is used along with Kafka connect as plugin
 ##### * Kafka connect to connect data source and stream data
 ##### * Kafka server for message broaker which will stream data from kafka connect
-##### * Zookepere for Kafka broakers co-ordination of the jobs
+##### * Zookeeper for Kafka broakers co-ordination of the jobs
 ##### * Spark streaming to process the data received from kafka topic in real-time
 ##### * Spark uses pyspark for data processing and processing job are written in python.
 ##### * Elastic search as data-index and persistence store
@@ -31,7 +31,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #### b.	ElasticSearch Installation and Set-up
 #####	1.	Create a file called "`elasticsearch.repo`" in the "`/etc/yum.repos.d/`"
 		$cd /etc/yum.repos.d/
-		$vi elasticsearch.repo
+		$sudo vi elasticsearch.repo
 
 #####	2. Copy below content on to "`elasticsearch.repo`" file
 
@@ -48,10 +48,11 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
         $sudo yum install elasticsearch            
         $sudo chkconfig --add elasticsearch
 
-#####	4. Update `elasticsearch.yml` from `/etc/elasticsearch/`
+#####	4. Update the file `/etc/elasticsearch/elasticsearch.yml` as below:
+		$sudo vi /etc/elasticsearch/elasticsearch.yml
 		network.host: xxx.xx.xx.xx <Internal_ip>
 		http.port: 9200
-		discovery.seed_hosts: ["xxx.xx.xxx.xx", "*.*.*.*", "host1", "host2"]
+		discovery.seed_hosts: ["<Internal_ip>", "*.*.*.*", "host1", "host2"]
 		discovery.type: single-node
 
 #####	5. Start elastic search using below command
@@ -60,7 +61,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #####	6. Log file in "`/var/log/elasticsearch/`"
 
 #####	7. Test elastic search with command curl -X GET "<internal_ip>:9200/?pretty"
-		Example: $curl -X GET “xxx.xx.x.x:9200/?pretty”
+		Example: $curl -X GET “<internal_ip>:9200/?pretty”
 
 #####	8. Elastic Search URL http://<public_ip>:9200
 		Example: http://xxx.xx.xxx.xx:9200/
@@ -69,7 +70,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #####   1. Create a file called "`kibana.repo`" in the "`/etc/yum.repos.d/`"
 		$cd /etc/yum.repos.d/
-		$vi kibana.repo
+		$sudo vi kibana.repo
 
 #####   2. Copy below content on to "`kibana.repo`" file
 
@@ -82,25 +83,26 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 		autorefresh=1
 		type=rpm-md
 	
-#####	3. Run command to install Kibana "sudo yum install kibana"
+#####	3. Run command to install Kibana `sudo yum install kibana`
 		$sudo yum install kibana
         $sudo chkconfig --add kibana
 
 #####   4. Update "`kibana.yml`" at /etc/kibana/ with sample values given below
+		$sudo vi /etc/kibana/kibana.yml
 		server.port: 5601
-		server.host: xxx.xx.xx.xx
-		elasticsearch.hosts: ["http://xxx.xx.xx.xx:9200"]
+		server.host: <internal_ip>
+		elasticsearch.hosts: ["http://<internal_ip>:9200"]
 
 #####   6. Start kibana using below command
 		$sudo -i service kibana start
 
-#####   7. Kibana URL `http://xxx.xx.xxx.xx:5601`
+#####   7. Kibana URL `http://<public_ip>:5601`
 
 #### d.	Logstash Installation and Set-up (Optional: Not required for real-time processing) for Batch Data Processing.
 
 #####   1. Create a file called "`logstash.repo`" in the "`/etc/yum.repos.d/`"
 		$cd /etc/yum.repos.d/
-		$vi logstash.repo
+		$sudo vi logstash.repo
 
 #####   2. Copy below content on to "`logstash.repo`" file
 
@@ -121,18 +123,20 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 	
 #### e.	Setting-up Security and Authentication
 #####	1. Install x-pack security plugin
-		It is installed with elastic by default with latest version of elastic search
+		It is installed with elastic by default with latest version of elastic search.   
+		Can check with `curl -X GET http://<internal_ip>:9200/_xpack?pretty`
 
-#####	2. Add below config parameters to  "`elaticsearch.yml`" located at "`/etc/elasticsearch/`"
+#####	2. Add below config parameters to  "`elaticsearch.yml`" at `/etc/elasticsearch/`.
+		$sudo vi /etc/elasticsearch/elasticsearch.yml`
 		xpack.security.enabled: true
 		xpack.security.transport.ssl.enabled: true
 	
 #####	3. Restart elasticsearch
 		$sudo -i service elasticsearch stop
-		$sudo -I service elasticsearch start
+		$sudo -i service elasticsearch start
 	
 #####	4. Change Elastic Passwords
-		$./bin/elasticsearch-setup-passwords interactive
+		$sudo /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive
 	
 		$curl -u <username>:<password> -X GET "xxx.xx.xx.xx:9200/?pretty"
 	
@@ -141,55 +145,58 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 			$curl -u elastic:elastic "xxx.xx.xx.xx:9200/_cat/indices?v"
 			$curl -u elastic:elastic -XDELETE xxx.xx.xx.xx:9200/index-name
 	
-#####	5. Change Kibana configuration at /etc/kibana/kibana.yml
+#####	5. Change Kibana configuration at `/etc/kibana/kibana.yml`.
+		$sudo vi /etc/kibana/kibana.yml
 		elasticsearch.username: "elastic"	
 		elasticsearch.password: "elastic"
 	
 #####	6. Restart kibana
 		$sudo -i service kibana stop
-		$sudo -I service kibana start
+		$sudo -i service kibana start
 
-		http://xxx.xx.xx.xx:5601/
+		http://<external_ip>:5601/
 	
 ### 3.	Set-up of Real-time data streaming
 
-#### 1.	Zookeper Installation and Configuration
+#### 1.	Zookeeper Installation and Configuration
 
-#####	1. Download zookeeper latest version and extract
-		$cd /home/madmin/zookeeper
-		$wget http://apachemirror.wuchna.com/zookeeper/zookeeper-3.6.1/apache-zookeeper-3.6.1-bin.tar.gz
-       	$tar -zxvf apache-zookeeper-3.6.1-bin.tar.gz
-		$cd apache-zookeeper-3.6.1-bin
+#####	1. Download zookeeper latest version (last updated 18/02/21) and extract
+		$mkdir ~/zookeeper
+		$cd ~/zookeeper
+		$wget https://apache.mirrors.nublue.co.uk/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+       	$tar -zxvf apache-zookeeper-3.6.2-bin.tar.gz
+		$cd apache-zookeeper-3.6.2-bin
 
 #####	2. Create zookeper configuration file with below content
 		$vi conf/zoo.cfg
 		tickTime = 2000
-		dataDir = /home/madmin/zookeeper/apache-zookeeper-3.6.1-bin/data
+		dataDir = <user home dir full path>/zookeeper/apache-zookeeper-3.6.2-bin/data
 		clientPort = 2181
 		initLimit = 5
 		syncLimit = 2
  
 #### 2.	Kafka Server Installation and Configuration 
 
-#####	1. Download latest version of kafka and extract
-		$cd /home/madmin/kafka
-		$wget http://apachemirror.wuchna.com/kafka/2.5.0/kafka_2.12-2.5.0.tgz
-		$tar -zxvf kafka_2.12-2.5.0.tgz
-		$cd kafka_2.12-2.5.0
+#####	1. Download latest _binary_ version of kafka (last updated 18/02/21) and extract
+		$mkdir ~/kafka
+		$cd ~/kafka
+		$wget https://apache.mirrors.nublue.co.uk/kafka/2.7.0/kafka_2.13-2.7.0.tgz
+		$tar -zxvf kafka_2.13-2.7.0.tgz
+		$cd kafka_2.13-2.7.0
 
 #####	2. Update the zookeeper properties in kafka config
 		$vi config/zookeeper.properties
-		dataDir=/home/madmin/zookeeper/apache-zookeeper-3.6.1-bin/data
+		dataDir=<user home dir>/zookeeper/apache-zookeeper-3.6.2-bin/data
 		clientPort=2181
 
-#####	3. Start the zookeeper with zookeeper properties in kafaka
+#####	3. Start the zookeeper with zookeeper properties in kafka
 		$bin/zookeeper-server-start.sh config/zookeeper.properties &
 
-#####	4. Start Kafka broaker
+#####	4. Start Kafka broker
 		$bin/kafka-server-start.sh config/server.properties &
 
-#####	5. Quick test of Kafka broaker by creating topic, producing and consuming messages *(optional)*
-		$bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 –topic test-topic
+#####	5. Quick test of Kafka broker by creating topic, producing and consuming messages *(optional)*
+		$bin/kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 
 		$bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 		$bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic test-topic
 		$bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning
@@ -203,52 +210,50 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 		
 #####	2. Configure postgres and set wal_level for logical decoding with the write-ahead log
 		$vi /var/lib/pgsql/10/data/postgresql.conf
-	         wal_level = logical
+	    wal_level = logical
 		Restart the postgres server
 
 #####	3. Download debezium postgres connectors plugin and extract.
-		$cd /home/madmin/Debezium
+		$mkdir ~/Debezium
+		$cd ~/Debezium
 		$wget https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/1.2.0.Final/debezium-connector-postgres-1.2.0.Final-plugin.tar.gz
 		$tar -zxvf debezium-connector-postgres-1.2.0.Final-plugin.tar.gz
-		$cd debezium-connector-postgres
 
 #####	4. Configure kafka connector properties file, Update below parameter	
-		$cd /home/madmin/kafka/kafka_2.12-2.5.0/config
+		$cd ~/kafka/kafka_2.13-2.7.0/config
 		$vi connect-standalone.properties
 	
-			plugin.path=/home/madmin/Debezium
-	        key.converter.schemas.enable=false
-	        value.converter.schemas.enable=false
+		plugin.path=<user path>/Debezium
+	    key.converter.schemas.enable=false
+	    value.converter.schemas.enable=false
 
 #####	5. Create the connector directory to keep all connector property files.
-		$cd /home/madmin/kafka/kafka_2.12-2.5.0
+		$cd ~/kafka/kafka_2.13-2.7.0
 		$mkdir connector
 	    
 #### 4.	Spark cluster set-up and configuration 
 
-#####	1. Create spark directory, install and configure
-		$cd /home/madmin
-		$mkdir spark
-		$cd spark
-		$wget http://apachemirror.wuchna.com/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz
-		$tar -xvf spark-2.4.6-bin-hadoop2.7.tgz
+#####	1. Create spark directory, install the latest `2.*` version, and configure
+		$mkdir ~/spark
+		$cd ~/spark
+		$wget https://apache.mirrors.nublue.co.uk/spark/spark-2.4.7/spark-2.4.7-bin-hadoop2.7.tgz
+		$tar -xvf spark-2.4.7-bin-hadoop2.7.tgz
 		$vi ~/.bashrc
-				export SPARK_HOME=/home/madmin/spark/spark-2.4.6-bin-hadoop2.7
-				export PATH=$PATH:$SPARK_HOME/bin
+		export SPARK_HOME=~/spark/spark-2.4.7-bin-hadoop2.7
+		export PATH=$PATH:$SPARK_HOME/bin
 		$source ~/.bashrc
 	
 #####	2. Start spark cluster (master and slave)
-		$cd /home/madmin/spark/spark-2.4.6-bin-hadoop2.7
+		$cd ~/spark/spark-2.4.7-bin-hadoop2.7
 		$./sbin/start-master.sh 
-		http://xxx.xx.xx.xx:8080/
+		$curl http://<internal_ip>:8080/  #note master-spark-URL
 		$./sbin/start-slave.sh <master-spark-URL>
-		$jps
 			
-#####	3.Installation of Python, PIP and Required Packages
-		$yum install python2
+#####	3.Installation of Python2, PIP (the python2 compatible) and Required Packages
+		$sudo yum install python2
 		$whereis python2
 		$sudo ln -s /usr/bin/python2 /usr/bin/python
-		$wget https://bootstrap.pypa.io/get-pip.py
+		$wget https://bootstrap.pypa.io/2.7/get-pip.py 
 		$python get-pip.py
 
 		$python -m pip install elasticsearch
@@ -268,7 +273,7 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 #### 1.	Kafka Deployment
 
 #####	1. Create required kafka topic to stream data from postgres
-		$cd /home/madmin/kafka/kafka_2.12-2.5.0
+		$cd ~/kafka/kafka_2.13-2.7.0
 		$bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --topic REPORTING-SERVER.ida.auth_transaction
 		
 		$bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --topic REPORTING-SERVER.prereg.applicant_demographic
@@ -285,35 +290,42 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 
 #### 2.	Spark streaming Jobs deployment
 #####	1. Copy spark python jobs from git repository (`reporting/reporting-framework/data-streaming/jobs/*`) to below directory
-		/home/madmin/spark/python-jobs/
+		$sudo yum install git
+		$cd ~
+		$git clone https://github.com/mosip/reporting.git
+		$cd reporting
+		$git checkout 1.1.4
+		$mkdir ~/spark/python-jobs
+		$cp ~/reporting/reporting-framework/data-streaming/jobs/* ~/spark/python-jobs/
 			
 #####	2. Copy spark jobs properties from git repository (`reporting/reporting-framework/data-streaming/properties/*`) to below directory
-		/home/madmin/spark/spark-2.4.6-bin-hadoop2.7/
+		$cp ~/reporting/reporting-framework/data-streaming/properties/* ~/spark/spark-2.4.7-bin-hadoop2.7/
 
-#####	3. Update the properties (`appconfig.properties`)file with valid elasticsearch host, port, user credentials and index name details
+#####	3. Update the properties (`appconfig.properties`)file with valid elasticsearch host (internal_ip), port, user credentials and index name details
+		$cd ~/spark/spark-2.4.7-bin-hadoop2.7/
+		$vi appconfig.properties
 
 #####	4. Run spark streaming jobs using below command
-		$cd /home/madmin/spark/spark-2.4.6-bin-hadoop2.7/
 
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-audit.py localhost:9092 REPORTING-SERVER.audit.app_audit_log &
+		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.7 ~/spark/python-jobs/mosip-db-streaming-audit.py localhost:9092 REPORTING-SERVER.audit.app_audit_log &
 	
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-ida.py localhost:9092 REPORTING-SERVER.ida.auth_transaction &
+		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.7 ~/spark/python-jobs/mosip-db-streaming-ida.py localhost:9092 REPORTING-SERVER.ida.auth_transaction &
 	
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-prereg.py localhost:9092 REPORTING-SERVER.prereg.applicant_demographic &
+		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.7 ~/spark/python-jobs/mosip-db-streaming-prereg.py localhost:9092 REPORTING-SERVER.prereg.applicant_demographic &
 	
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin/spark/python-jobs/mosip-db-streaming-regclient.py localhost:9092 REPORTING-SERVER.regprc.registration_list &
+		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.7 ~/spark/python-jobs/mosip-db-streaming-regclient.py localhost:9092 REPORTING-SERVER.regprc.registration_list &
 	
-		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.6 /home/madmin /spark/python-jobs/mosip-db-streaming-reg.py localhost:9092 REPORTING-SERVER.regprc.registration &
+		$./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.7 ~/spark/python-jobs/mosip-db-streaming-reg.py localhost:9092 REPORTING-SERVER.regprc.registration &
 
 #### 3.	Kafka Connect Deployment with Debezium
 #####	1. Copy connector properties from git repository (`reporting/reporting-framework/kafka-connect/properties/*`) to below directory
 
-		/home/madmin/kafka/kafka_2.12-2.5.0/connector
+		$cp ~/reporting/reporting-framework/kafka-connect/properties/* ~/kafka/kafka_2.13-2.7.0/connector/
 
-#####	2. Update the connector properties (`*. properties`) files with postgres details like, host, port, user credentials, database, schema and table details.
+#####	2. Update the connector properties (`~/kafka/kafka_2.13-2.7.0/connector/*.properties`) files with postgres details like, host, port, user credentials, database, schema and table details.~/kaf
 
 #####	3. Start kafka connector with below commands
-		$cd /home/madmin/kafka/kafka_2.12-2.5.0
+		$cd ~/kafka/kafka_2.13-2.7.0
 		$bin/connect-standalone.sh config/connect-standalone.properties connector/connector-audit.properties connector/connector-ida.properties connector/connector-prereg.properties connector/connector-regclient.properties connector/connector-reg.properties &
 			
 #### 4.	Deploy Kibana Dashboard and reference Reports
@@ -350,7 +362,8 @@ Document is to present the MOSIP reference reporting framework set-up and deploy
 			
 #### 2.	Test Elastic Search Index for data update
 #####	a.	Test records number is increased on elastic index using below command
-			$curl -u elastic:elastic -X GET "xxx.xx.xx.xx:9200/?pretty"
+			$curl -u elastic:elastic -X GET "xxx.xx.xx.xx:9200/_cat/indices?v"
+
 #####	b.	Check for below index names
 			prereg-indexname = idx-prereg
 			regclient-indexname = idx-regclient
