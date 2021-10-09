@@ -11,7 +11,7 @@ Reference reporting framework for real-time streaming data and visualization.
  
 * MOSIP cluster installed as given [here](https://github.com/mosip/mosip-infra/tree/1.2.0_v3/deployment/v3)
 * Elasticsearch and Kibana already running in the cluster. 
-* Postgres installed with `extended.conf` as extended config. (MOSIP default install has this configured)
+* Postgres installed with `extended.conf`. (MOSIP default install has this configured)
 
 ###  Install
 * Inspect `scripts/values.yaml` for modules to be installed.
