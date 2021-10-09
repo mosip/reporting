@@ -1,18 +1,17 @@
-# this is for installing kafka with zookeeper from bitnami charts
-# if not preinstalled, enable these
+# Kafka with zookeeper from bitnami charts if not preinstalled, enable these
 bitnami-kafka:
   enabled: true
   zookeeper:
     enabled: true
 
-# This is for debezium kafka connector
+# Debezium kafka connector
 debezium:
   enabled: true
   # If kafka is preinstalled, specify how it can be reached here
   # kafka:
   #   server: "kafka:9092"
 
-# This is for elasticsearch kafka connector
+# Elasticsearch kafka connector
 confluentinc:
   enabled: true
   cp-kafka-connect:
@@ -23,11 +22,12 @@ confluentinc:
     # configurationOverrides:
     #   zookeeper.connect: zookeeper:2181
 
-# this is for kafkaClient
+# KafkaClient
 kafkaClient:
   enabled: true
   # the following is when no secret is to be used from db_pass
   db_secretref: null
 
+# Enable if you do not have Elastisearch already installed in your cluster
 bitnami-elasticsearch:
   enabled: false

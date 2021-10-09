@@ -25,7 +25,6 @@ debezium_connectors:
   - name: "mosip_idrepo"
     tables: "idrepo.anonymous_profile"
 
-
 es_kafka_connectors:
   enabled: true
   delay_between_connectors: "10s"

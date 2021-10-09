@@ -14,22 +14,14 @@ Reference reporting framework for real-time streaming data and visualization.
 * Postgres installed with `extended.conf` as extended config. (MOSIP default install has this configured)
 
 ###  Install
-
-* Inspect `values.yaml` and `values-init.yaml` and configure appropriately.  Leave as is for default installation.
-* Install the following helm charts using `scripts/install.sh`
-  - `mosip/reporting` Helm chart:
-    - Debezium Kafka Connect
-    - Elasticsearch Kafka Connect 
-    - Kafka+Zookeeper _(optional)_
-    - Elasticsearch & Kibana _(optional)_
-  - `mosip/reporting-init` Helm chart:
-    - Debezium-Postgres connectors
-    - Elasticsearch-Kafka connectors
-- Run
+* Inspect `scripts/values.yaml` for modules to be installed.
+* Inspect `scripts/values-init.yaml` for connector configs.
+* Run
 ```sh
 cd scripts
 ./install.sh <kube-config-file>
 ```
+All components will be installed in `reporting` namespace of the cluster.
 
 - NOTE: for the db_user use superuser/`postgres` for now, because any other user would require the db_ownership permission, create permission & replication permission. (TODO: solve the problems when using a different user.)
 - NOTE: before installing, `reporting-init` debezium configuration, make sure to include all tables under that db beforehand. If one wants to add another table from the same db, it might be harder later on. (TODO: develop some script that adds additional tables under the same db)
@@ -48,14 +40,14 @@ Install your own connectors as given [here](docs/connectors.md)
 
 ## Cleanup/uninstall
 
-- Delete the reporting components
+* Delete the reporting components
+```sh
+helm delete reporting-init -n reporting
+helm delete reporting -n reporting
+kubectl delete ns reporting
 ```
-$ helm delete reporting-init -n reporting
-$ helm delete reporting -n reporting
-$ kubectl delete ns reporting
-```
-- Postgres Cleanup
-    - List replication replication slots.
+* Postgres cleanup
+    * List replication replication slots.
     ```
     postgres=# select * from pg_replication_slots;
     ```
@@ -69,8 +61,8 @@ $ kubectl delete ns reporting
     postgres=# select * from pg_publication;
     postgres=# drop publication <pub_name>;
     ```
-- Kafka Cleanup
-    - It is recommended to cleanup all topics related to reporting in kafka, as the data will anyway be there in db/elasticsearch
-    - Delete all the relavent topics and the debezium and es kafka connectors' `status`, `offset` and `config` topics.
+* Kafka Cleanup
+    * It is recommended to cleanup all topics related to reporting in kafka, as the data will anyway be there in db/elasticsearch
+    * Delete all the relavent topics and the debezium and es kafka connectors' `status`, `offset` and `config` topics.
 - Elasticsearch and Kibana Cleanup
-    - One can delete the es indices, and delete the dashboards from kibana from the ui, if required.
+    * One can delete the es indices, and delete the dashboards from kibana from the ui, if required.
