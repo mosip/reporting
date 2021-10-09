@@ -40,13 +40,13 @@ Install your own connectors as given [here](docs/connectors.md)
 
 ## Cleanup/uninstall
 
-* Delete the reporting components
+### Delete reporting components
 ```sh
 helm delete reporting-init -n reporting
 helm delete reporting -n reporting
 kubectl delete ns reporting
 ```
-* Postgres cleanup
+### Postgres cleanup
     * List replication replication slots.
     ```
     postgres=# select * from pg_replication_slots;
@@ -61,8 +61,8 @@ kubectl delete ns reporting
     postgres=# select * from pg_publication;
     postgres=# drop publication <pub_name>;
     ```
-* Kafka Cleanup
+### Kafka Cleanup
     * It is recommended to cleanup all topics related to reporting in kafka, as the data will anyway be there in db/elasticsearch
     * Delete all the relavent topics and the debezium and es kafka connectors' `status`, `offset` and `config` topics.
-- Elasticsearch and Kibana Cleanup
+* Elasticsearch and Kibana Cleanup
     * One can delete the es indices, and delete the dashboards from kibana from the ui, if required.
