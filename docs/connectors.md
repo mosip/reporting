@@ -3,7 +3,7 @@
 ## Custom connectors
 To install custom  connectors follow the methods given below. 
 
-The methods here will NOT add automatically DB tables to debezium. Add your tables (if not already present) by editing a connnector's config.
+The methods here will NOT automatically add DB tables to Debezium. Add your tables (if not already present) by editing a connnector's config.
 
 ### Method 1:
 * Put the new elasticsearch connectors in one folder.
