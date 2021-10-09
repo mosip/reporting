@@ -3,7 +3,7 @@
 ## Introduction
 Reference reporting framework for real-time streaming data and visualization.  
 
-![](../docs/images/reporting_architecture.png)
+![](docs/images/reporting_architecture.png)
 
 ## Installation in Kubernetes cluster
 
