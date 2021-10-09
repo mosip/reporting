@@ -8,19 +8,20 @@ Reference reporting framework for real-time streaming data and visualization.
 ## Installation in Kubernetes cluster
 
 ### Prerequisites
-The installation procedure here assumes that you have installed MOSIP cluster as given [here](https://github.com/mosip/mosip-infra/tree/1.2.0_v3/deployment/v3) with the following assumptions:
-    - Elasticsearch and Kibana are already installed in the cluster.
-    - Postgres is already installed with `extended.conf` as extended config.
+The installation procedure here assumes that you have installed MOSIP cluster as given [here](https://github.com/mosip/mosip-infra/tree/1.2.0_v3/deployment/v3) and
+
+* Elasticsearch and Kibana are already installed in the cluster.
+* Postgres is already installed with `extended.conf` as extended config.
 
 
 ###  Install
 The `scripts/install.sh` installs the following Helm charts:
-  - `reporting` Helm chart:
+  - `mosip/reporting` Helm chart:
     - Debezium Kafka Connect
     - Elasticsearch Kafka Connect 
     - Kafka+Zookeeper _(optional)_
     - Elasticsearch & Kibana _(optional)_
-  - `reporting-init` Helm chart:
+  - `mosip/reporting-init` Helm chart:
     - Debezium-Postgres connectors
     - Elasticsearch-Kafka connectors
 
