@@ -1,7 +1,7 @@
 # Reporting framework
 
 ## Introduction
-Reference reporting framework for real-time streaming data and visualization.  
+Reporting framework for real-time streaming data and visualization.  
 
 ![](docs/images/reporting_architecture.png)
 
