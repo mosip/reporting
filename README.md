@@ -10,8 +10,8 @@ Reference reporting framework for real-time streaming data and visualization.
 ### Prerequisites
  
 * MOSIP cluster installed as given [here](https://github.com/mosip/mosip-infra/tree/1.2.0_v3/deployment/v3)
-* Elasticsearch and Kibana are already running in the cluster. 
-* Postgres is installed with `extended.conf` as extended config. (MOSIP default install has this configured)
+* Elasticsearch and Kibana already running in the cluster. 
+* Postgres installed with `extended.conf` as extended config. (MOSIP default install has this configured)
 
 ###  Install
 The `scripts/install.sh` installs the following Helm charts:
