@@ -13,7 +13,7 @@ Reporting framework for real-time streaming data and visualization.
 * Elasticsearch and Kibana already running in the cluster. 
 * Postgres installed with `extended.conf`. (MOSIP default install has this configured)
 
-###  Install
+###  Install data pipeline
 * Inspect `scripts/values.yaml` for modules to be installed.
 * Inspect `scripts/values-init.yaml` for connector configs.
 * Run
@@ -26,7 +26,7 @@ All components will be installed in `reporting` namespace of the cluster.
 - NOTE: for the db_user use superuser/`postgres` for now, because any other user would require the db_ownership permission, create permission & replication permission. (TODO: solve the problems when using a different user.)
 - NOTE: before installing, `reporting-init` debezium configuration, make sure to include all tables under that db beforehand. If one wants to add another table from the same db, it might be harder later on. (TODO: develop some script that adds additional tables under the same db)
 
-## Upload Kibana dashboards
+### Upload Kibana dashboards
 Various Kibana dashboards are available in `dashboards` folder.  Upload all of them with the following script:
 ```sh
 cd scripts
