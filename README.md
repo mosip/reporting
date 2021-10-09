@@ -38,7 +38,7 @@ cd scripts
 - NOTE: before installing, `reporting-init` debezium configuration, make sure to include all tables under that db beforehand. If one wants to add another table from the same db, it might be harder later on. (TODO: develop some script that adds additional tables under the same db)
 
 ## Upload Kibana dashboards
-Various dashboards are available in `kibana_dashboards` folder.  Upload all of them with the following script:
+Various Kibana dashboards are available in `dashboards` folder.  Upload all of them with the following script:
 ```sh
 cd scripts
 ./load_kibana_dashboards.sh
