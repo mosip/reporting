@@ -14,7 +14,9 @@ Reference reporting framework for real-time streaming data and visualization.
 * Postgres installed with `extended.conf` as extended config. (MOSIP default install has this configured)
 
 ###  Install
-The `scripts/install.sh` installs the following Helm charts:
+
+* Inspect `values.yaml` and `values-init.yaml` and configure appropriately.  Leave as is for default installation.
+* Install the following helm charts using `scripts/install.sh`
   - `mosip/reporting` Helm chart:
     - Debezium Kafka Connect
     - Elasticsearch Kafka Connect 
@@ -23,11 +25,6 @@ The `scripts/install.sh` installs the following Helm charts:
   - `mosip/reporting-init` Helm chart:
     - Debezium-Postgres connectors
     - Elasticsearch-Kafka connectors
-
-All components will be installed in `reporting` namespace of the cluster.
-
-**Install**:
-- Inspect `values.yaml` and `values-init.yaml` and configure appropriately.  Leave as is for default installation.
 - Run
 ```sh
 cd scripts
