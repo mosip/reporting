@@ -38,7 +38,7 @@ The dashboards may also be uploaded manually using Kibana UI.
 Install your own connectors as given [here](docs/connectors.md)
 
 ## Cleanup/uninstall
-To clean up the entire data pipeline follow the steps give [here](docs/cleanup.md)
+To clean up the entire data pipeline follow the steps given [here](docs/cleanup.md)
 
 CAUTION: Know what you are doing!  
 
