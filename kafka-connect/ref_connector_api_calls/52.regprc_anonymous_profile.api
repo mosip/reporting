@@ -6,7 +6,7 @@
 #DB_PREFIX_INDEX=
 #ES_URL=
 
-CONN_NAME="qa_double_rc2_regprc_anon_profile_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
+CONN_NAME="regprc_anon_profile_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
 
 DEBEZ_CONN_URL='debezium-service.reporting:8083'; # needn't change .. this is the debezium-connector service name
 ES_CONN_URL='es-connect.reporting:8083'; # needn't change .. this is the ES-connector service name
