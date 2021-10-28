@@ -8,30 +8,6 @@
 #   es_url:
 #   kibana_url:
 
-<<<<<<< HEAD
-  debezium_connectors:
-    enabled: true
-    delay_between_connectors: "20s"
-    # existingConfigMap:
-    dbs:
-    - name: "mosip_master"
-      tables: "master.doc_type,master.registration_center"
-    - name: "mosip_audit"
-      tables: "audit.app_audit_log"
-    - name: "mosip_prereg"
-      tables: "prereg.applicant_demographic,prereg.applicant_demographic_consumed,prereg.applicant_document,prereg.applicant_document_consumed,prereg.reg_appointment,prereg.reg_appointment_consumed,prereg.reg_available_slot,prereg.otp_transaction"
-    - name: "mosip_ida"
-      tables: "ida.auth_transaction"
-    - name: "mosip_regprc"
-      tables: "regprc.registration,regprc.registration_list"
-    - name: "mosip_idrepo"
-      tables: "idrepo.anonymous_profile"
-  
-  es_kafka_connectors:
-    enabled: true
-    delay_between_connectors: "10s"
-    # existingConfigMap:
-=======
 debezium_connectors:
   enabled: true
   delay_between_connectors: "20s"
@@ -54,4 +30,3 @@ es_kafka_connectors:
   enabled: true
   delay_between_connectors: "10s"
   # existingConfigMap:
->>>>>>> 2f5d3c8fb73f48ed61ae1742921e1a093e47e111
