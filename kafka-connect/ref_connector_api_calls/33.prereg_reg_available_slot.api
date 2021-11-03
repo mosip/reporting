@@ -72,7 +72,7 @@ curl \
           "transforms.tsconvert06.input.type": "micro_sec",
 
           "transforms.tsconvert07.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert07.field": "upd_dtimes",
+          "transforms.tsconvert07.field": "del_dtimes",
           "transforms.tsconvert07.input.type": "micro_sec",
 
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",

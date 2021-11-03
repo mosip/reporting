@@ -34,8 +34,8 @@ public class DynamicNewFieldTest {
     @Test
     public void testWithSchema() {
         Map<String, String> config = new HashMap<>();
-        config.put(DynamicNewField.ES_URL_CONFIG, "http://elasticsearch-master.cattle-logging-system:9200");
-        config.put(DynamicNewField.ES_INDEX_CONFIG, "reg_cen");
+        config.put(DynamicNewField.ES_URL_CONFIG, "http://localhost:9200");
+        config.put(DynamicNewField.ES_INDEX_CONFIG, System.getProperty("user.name")+"s_temp_reg_cen");
         config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "id,lang_code");
         config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
         config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "regcntr_id,lang_code");
@@ -74,8 +74,8 @@ public class DynamicNewFieldTest {
     @Test
     public void testSchemalessNullField() {
         Map<String, String> config = new HashMap<>();
-        config.put(DynamicNewField.ES_URL_CONFIG, "http://elasticsearch-master.cattle-logging-system:9200");
-        config.put(DynamicNewField.ES_INDEX_CONFIG, "reg_cen");
+        config.put(DynamicNewField.ES_URL_CONFIG, "http://localhost:9200");
+        config.put(DynamicNewField.ES_INDEX_CONFIG, "laliths_temp_reg_cen");
         config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "id");
         config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
         config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "regcntr_id");

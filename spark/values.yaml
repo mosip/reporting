@@ -1,0 +1,7 @@
+worker:
+  replicaCount: 1
+
+image:
+  repository: lalithkota/spark-b
+  tag: develop
+  pullPolicy: Always
