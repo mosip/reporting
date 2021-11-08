@@ -14,6 +14,8 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 
+import org.apache.commons.codec.binary.Base64;
+
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.json.JSONArray;
@@ -151,7 +153,15 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
                     ((Map<String, Object>)m.get("digitalId")).remove("dateTime");
                 }
                 catch(JSONException je){
-                    //ignore
+                    try{
+                        String str = (String)m.get("digitalId");
+                        str = new String(new Base64(true).decode(str));
+                        m.put("digitalId", StringToJson.returnSchemalessObject(new JSONObject(str)));
+                        ((Map<String, Object>)m.get("digitalId")).remove("dateTime");
+                    }
+                    catch(Exception e){
+                      e.printStackTrace();
+                    }
                 }
             }
             m.put("attempts",attemptsSum/count);

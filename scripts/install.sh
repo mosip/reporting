@@ -35,5 +35,19 @@ sleep 30s
 echo "Installing reporting-init helm"
 INSTALL_NAME=$(kubectl get cm global -o jsonpath={.data.installation-name})
 read -p "Give the installation name: (default: $INSTALL_NAME) " TO_REPLACE
-TO_REPLACE=${TO_REPLACE:-$INSTALL_NAME}
-helm -n $NS install reporting-init mosip/reporting-init -f values-init.yaml --set base.db_prefix=$TO_REPLACE --wait --version $CHART_VERSION
+INSTALL_NAME=${TO_REPLACE:-$INSTALL_NAME}
+unset TO_REPLACE
+
+DEBEZ_CONN_FILE="../kafka-connect/debez-sample-conn.api"
+read -p "Give the path to debez sample connector file: (default: $DEBEZ_CONN_FILE) " TO_REPLACE
+DEBEZ_CONN_FILE=${TO_REPLACE:-$DEBEZ_CONN_FILE}
+unset TO_REPLACE
+
+ES_CONN_FOLDER="../kafka-connect/ref_connector_api_calls"
+read -p "Give the path to folder containing es connectors: (default: $ES_CONN_FOLDER) " TO_REPLACE
+ES_CONN_FOLDER=${TO_REPLACE:-$ES_CONN_FOLDER}
+unset TO_REPLACE
+
+kubectl delete cm debz-conn-confmap -n $NS; kubectl create cm debz-conn-confmap --from-file=$DEBEZ_CONN_FILE -n $NS
+kubectl delete cm es-conn-confmap -n $NS; kubectl create cm es-conn-confmap --from-file=$ES_CONN_FOLDER -n $NS
+helm -n $NS install reporting-init mosip/reporting-init --wait --version $CHART_VERSION -f values-init.yaml --set base.db_prefix=$INSTALL_NAME --set debezium_connectors.existingConfigMap=debz-conn-confmap --set es_kafka_connectors.existingConfigMap=es-conn-confmap
