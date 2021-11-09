@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-spark2
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spark
+  namespace: test-spark2
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: spark-role
+  namespace: test-spark2
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spark-role-binding
+  namespace: test-spark2
+subjects:
+- kind: ServiceAccount
+  name: spark
+  namespace: test-spark2
+roleRef:
+  kind: Role
+  name: spark-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: test-job-01
+  namespace: test-spark2
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "lalithkota/apache-spark-py:develop"
+  imagePullPolicy: Always
+  mainApplicationFile: local:///my-spark-jobs/01-test-job/01.test_job.py
+  arguments:
+  - "kafka.reporting:9092"
+  - "qa_double_rc2"
+  - "elasticsearch-master.cattle-logging-system:9200"
+  - "30 seconds"
+  - "pysparklal-"
+  deps:
+    pyFiles:
+    - local:///my-spark-jobs/01-test-job/base.py
+    packages:
+    - "org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0"
+  sparkVersion: "3.2.0"
+  restartPolicy:
+    type: OnFailure
+    onFailureRetries: 3
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+  driver:
+    instances: 1
+    cores: 1
+    coreLimit: "1200m"
+    memory: "1024m"
+    memoryOverhead: "512m"
+    serviceAccount: spark
+    configMaps:
+    - name: 01-test-conf
+      path: /my-spark-jobs/01-test-job
+  executor:
+    instances: 1
+    cores: 1
+    coreLimit: "1200m"
+    memory: "1024m"
+    memoryOverhead: "512m"
+    serviceAccount: spark
+    env:
+    - name: SPARK_EXTRA_CLASSPATH
+      value: '/opt/spark/.ivy2/jars/*'
+    configMaps:
+    - name: 01-test-conf
+      path: /my-spark-jobs/01-test-job

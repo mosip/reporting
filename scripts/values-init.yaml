@@ -22,7 +22,7 @@ debezium_connectors:
   - name: "mosip_ida"
     tables: "ida.auth_transaction"
   - name: "mosip_regprc"
-    tables: "regprc.registration,regprc.registration_list"
+    tables: "regprc.registration,regprc.registration_list,regprc.anonymous_profile"
   - name: "mosip_idrepo"
     tables: "idrepo.anonymous_profile"
 

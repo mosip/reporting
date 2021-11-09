@@ -169,7 +169,7 @@ public abstract class StringToJson<R extends ConnectRecord<R>> implements Transf
         return builder.build();
     }
 
-    private Object returnSchemalessObject(Object obj){
+    static Object returnSchemalessObject(Object obj){
         if (obj instanceof JSONObject){
             Map<String, Object> returner = new HashMap<>();
             JSONObject json = (JSONObject)obj;
@@ -197,7 +197,7 @@ public abstract class StringToJson<R extends ConnectRecord<R>> implements Transf
         }
     }
 
-    private Object returnSchemaObject(Object obj){
+    static Object returnSchemaObject(Object obj){
         // this is not ready
         return "WITH SCHEMA: NOT READY YET";
     }
