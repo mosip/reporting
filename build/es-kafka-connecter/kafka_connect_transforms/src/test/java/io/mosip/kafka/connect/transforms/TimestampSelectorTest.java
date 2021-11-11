@@ -34,42 +34,52 @@ public class TimestampSelectorTest {
     @Test
     public void testSchemaless() {
         Map<String, String> config = new HashMap<>();
-        config.put(TimestampSelector.TS_ORDER_CONFIG, "ts2,ts1");
+        config.put(TimestampSelector.TS_ORDER_CONFIG, "ts2temp,tst.time,test.time2,test.time,ts2,ts1");
         config.put(TimestampSelector.OUTPUT_FIELD_CONFIG, "ts3");
 
         xformValue.configure(config);
 
         Map<String, Object> original = new HashMap<>();
+        Map<String, Object> test = new HashMap<>();
+        test.put("time","2021-12-11T11:06:09.108Z");
         original.put("ts1", "2021-09-13T11:06:09.108Z");
         original.put("ts2", "2021-12-12T11:06:09.108Z");
+        original.put("test",test);
         original.put("other", "test");
 
         SourceRecord transformed = xformValue.apply(createRecordSchemaless(original));
 
         assertEquals("2021-09-13T11:06:09.108Z", ((Map<String, Object>) transformed.value()).get("ts1"));
         assertEquals("2021-12-12T11:06:09.108Z", ((Map<String, Object>) transformed.value()).get("ts2"));
+        assertEquals("2021-12-11T11:06:09.108Z", ((Map<String, Object>)((Map<String, Object>) transformed.value()).get("test")).get("time"));
         assertEquals("test", ((Map<String, Object>) transformed.value()).get("other"));
-        assertEquals("2021-12-12T11:06:09.108Z", ((Map<String, Object>) transformed.value()).get("ts3"));
+        assertEquals("2021-12-11T11:06:09.108Z", ((Map<String, Object>) transformed.value()).get("ts3"));
     }
 
     // test regular : schema
     @Test
     public void testWithSchema() {
         Map<String, String> config = new HashMap<>();
-        config.put(TimestampSelector.TS_ORDER_CONFIG, "ts2,ts1");
+        config.put(TimestampSelector.TS_ORDER_CONFIG, "ret1,tes.time,test.time2,test.time,ts2,ts1");
         config.put(TimestampSelector.OUTPUT_FIELD_CONFIG, "ts3");
 
         xformValue.configure(config);
 
         // ts field is a unix timestamp
+        Schema testSchema = SchemaBuilder.struct().field("time",Schema.STRING_SCHEMA).build();
         Schema structWithTimestampFieldSchema = SchemaBuilder.struct()
                 .field("ts1", Schema.STRING_SCHEMA)
                 .field("ts2", Schema.STRING_SCHEMA)
                 .field("other", Schema.STRING_SCHEMA)
+                .field("test",testSchema)
                 .build();
+        Struct testStruct = new Struct(testSchema);
+        testStruct.put("time","2021-12-11T11:06:09.108Z");
         Struct original = new Struct(structWithTimestampFieldSchema);
         original.put("ts1", "2021-09-13T11:06:09.108Z");
         original.put("ts2", "2021-12-12T11:06:09.108Z");
+        original.put("test", testStruct);
+
         original.put("other", "test");
 
         SourceRecord transformed = xformValue.apply(createRecordWithSchema(structWithTimestampFieldSchema, original));
@@ -78,13 +88,14 @@ public class TimestampSelectorTest {
                 .field("ts1", Schema.STRING_SCHEMA)
                 .field("ts2", Schema.STRING_SCHEMA)
                 .field("other", Schema.STRING_SCHEMA)
+                .field("test", testSchema)
                 .field("ts3", Schema.STRING_SCHEMA)
                 .build();
         assertEquals(expectedSchema, transformed.valueSchema());
         assertEquals("2021-09-13T11:06:09.108Z", ((Struct) transformed.value()).get("ts1"));
         assertEquals("2021-12-12T11:06:09.108Z", ((Struct) transformed.value()).get("ts2"));
         assertEquals("test", ((Struct) transformed.value()).get("other"));
-        assertEquals("2021-12-12T11:06:09.108Z", ((Struct) transformed.value()).get("ts3"));
+        assertEquals("2021-12-11T11:06:09.108Z", ((Struct) transformed.value()).get("ts3"));
     }
 
     @Test

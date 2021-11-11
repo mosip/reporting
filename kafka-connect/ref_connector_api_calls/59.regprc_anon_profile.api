@@ -37,7 +37,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,tsSelect,stringtojson01,anonTransform",
+          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,tsSelect",
 
           "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
           "transforms.ext1.field": "payload",
@@ -56,13 +56,16 @@ curl \
           "transforms.tsconvert03.field": "del_dtimes",
           "transforms.tsconvert03.input.type": "micro_sec",
 
-          "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
-          "transforms.tsSelect.ts.order": "upd_dtimes,cr_dtimes",
-          "transforms.tsSelect.output.field": "@timestamp_gen",
-
           "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
           "transforms.stringtojson01.input.field": "profile",
 
-          "transforms.anonTransform.type": "io.mosip.kafka.connect.transforms.AnonymousProfileTransform$Value"
+          "transforms.anonTransform.type": "io.mosip.kafka.connect.transforms.AnonymousProfileTransform$Value",
+          "transforms.anonTransform.profiles.fields.list": "profile",
+          "transforms.anonTransform.age.groups.list": "0-5, 5-18, 18-60, 60 and above",
+          "transforms.anonTransform.age.groups.output.field": "ageGroup",
+
+          "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
+          "transforms.tsSelect.ts.order": "profile.date,upd_dtimes,cr_dtimes",
+          "transforms.tsSelect.output.field": "@timestamp_gen"
       }
 }';
