@@ -145,8 +145,8 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
 
         Object ret=null;
         for(String field : config.tsOrder){
-            Object v = value.get(field);
-            if(v!=null){ ret=v; break; }
+            ret = getNestedField(value,field);
+            if(ret!=null){ break; }
         }
         if(ret==null){
             throw new DataException("None of the fields mentioned in timestamp order have a valid value.");
@@ -161,10 +161,10 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
         final Struct value = requireStruct(operatingValue(record), PURPOSE);
 
         Object ret=null;
-        String outfield=null;
+        Object outSchema=null;
         for(String field : config.tsOrder){
-            try{ ret = value.get(field); outfield=field; }
-            catch(DataException de){}
+            Object tmp = getNestedField(value,field);
+            ret = ((Object[])tmp)[0]; outSchema = ((Object[])tmp)[1];
             if(ret!=null)if(!ret.equals("")) break;
         }
         if(ret==null){
@@ -173,7 +173,8 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
 
         Schema updatedSchema = schemaUpdateCache.get(value.schema());
         if (updatedSchema == null) {
-            updatedSchema = makeUpdatedSchema(value.schema(),outfield);
+            // Hardcoding to string schema here .. which might not be correct in all cases
+            updatedSchema = makeUpdatedSchema(value.schema(), config.outputField, (Schema)outSchema);
             schemaUpdateCache.put(value.schema(), updatedSchema);
         }
 
@@ -187,16 +188,48 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
 
         return newRecord(record, updatedSchema, updatedValue);
     }
-    private Schema makeUpdatedSchema(Schema schema, String outfield) {
+    static Schema makeUpdatedSchema(Schema schema, String outField, Schema outSchema) {
         final SchemaBuilder builder = SchemaUtil.copySchemaBasics(schema, SchemaBuilder.struct());
 
         for (Field field : schema.fields()) {
             builder.field(field.name(), field.schema());
         }
 
-        builder.field(config.outputField, schema.field(outfield).schema());
+        builder.field(outField, outSchema);
 
         return builder.build();
+    }
+
+    static Object getNestedField(Map<String,Object> tree, String field){
+        Object v=tree;
+        System.out.println("===> Fields: "+field);
+        for(String subfield: field.split("\\.")){
+            v = ((Map<String,Object>)v).get(subfield);
+            if(v == null){
+                break;
+            }
+        }
+        return v;
+    }
+
+    static Object getNestedField(Struct tree, String field){
+        Object[] ret = new Object[2];
+        ret[0]=null; ret[1]=null;
+        Object v=tree;
+        Object vSchema=null;
+        for(String subfield: field.split("\\.")){
+            try{
+                Object tmpField = ((Struct)v).schema().field(subfield);
+                if(tmpField!=null){
+                    vSchema=((Field)tmpField).schema();
+                }
+                v = ((Struct)v).get(subfield);
+            }
+            catch(DataException de){ return ret; }
+        }
+        ret[0]=v;
+        ret[1]=vSchema;
+        return ret;
     }
 
 }

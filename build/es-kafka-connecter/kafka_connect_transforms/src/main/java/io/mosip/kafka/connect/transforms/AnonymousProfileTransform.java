@@ -32,12 +32,34 @@ import java.io.IOException;
 public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> implements Transformation<R> {
 
     public static final String PURPOSE = "Apply all anonymous profile related transformations";
+    public static final String PROFILES_FIELDS = "profiles.fields.list";
+    public static final String AGE_GROUPS_FIELD = "age.groups.list";
+    public static final String AGE_GROUPS_OUPUT_FIELD = "age.groups.output.field";
 
-    public static ConfigDef CONFIG_DEF = new ConfigDef();
+    private String[] profileFieldsList;
+    private String[] ageGroupsList;
+    private String ageGroupsOuputField;
+
+    public static ConfigDef CONFIG_DEF = new ConfigDef()
+        .define(PROFILES_FIELDS, ConfigDef.Type.STRING, "profile", ConfigDef.Importance.HIGH, "This is a list of profiles that have to be processed by this transform")
+        .define(AGE_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the age groups in which it has to be categorised")
+        .define(AGE_GROUPS_OUPUT_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "the ouput field in which agegroup has to be put (w.r.t to the profile fields)");
 
     @Override
     public void configure(Map<String, ?> configs) {
-        // nothing to configure
+        AbstractConfig absconf = new AbstractConfig(CONFIG_DEF, configs, false);
+        String prFL = absconf.getString(PROFILES_FIELDS);
+        String agl = absconf.getString(AGE_GROUPS_FIELD);
+
+        ageGroupsOuputField = absconf.getString(AGE_GROUPS_OUPUT_FIELD);
+
+        profileFieldsList = prFL.replaceAll("\\s+","").split(",");
+        ageGroupsList = agl.split(",");
+
+
+        if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty()){
+            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD);
+        }
     }
 
     @Override
@@ -105,24 +127,37 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
     private R applySchemaless(R record) {
         final Map<String, Object> value = Requirements.requireMap(operatingValue(record), PURPOSE);
 
-        Map<String, Object> updatedValue = new HashMap<>(value);
+        Map<String, Object> updatedValueRoot = new HashMap<>(value);
 
-        processBiometricList(updatedValue);
-        processLocationList(updatedValue);
-        // rest of the transform funcs
+        for(int i=0; i<profileFieldsList.length ; i++){
+            Map<String, Object> updatedValue = updatedValueRoot;
+            String[] profHierar = (profileFieldsList[i]).split("\\.");
+            try{
+                for(int j=0; j<profHierar.length ; j++){
+                    updatedValue = (Map<String, Object>)updatedValue.get(profHierar[j]);
+                }
+            }
+            catch(Exception e){
+                throw new ConfigException("Improper profile fields list. Some of the given fields are not found. Given List: " + profileFieldsList + "\n Exception details: " + e);
+            }
+            if(updatedValue != null){
+                processBiometricList(updatedValue);
+                processLocationList(updatedValue);
+                processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField);
+                processChannel(updatedValue);
+                // rest of the transform funcs
+            }
+        }
 
-        return newRecord(record, null, updatedValue);
+        return newRecord(record, null, updatedValueRoot);
     }
 
-    void processBiometricList(Map<String, Object> updatedValue){
-        if(updatedValue.get("profile") == null){
-            return;
-        }
-        else if( ((Map<String,Object>)updatedValue.get("profile")).get("biometricInfo") == null ){
+    static void processBiometricList(Map<String, Object> updatedValue){
+        if( updatedValue.get("biometricInfo") == null ){
             return;
         }
 
-        List<Object> arr = (List<Object>)((Map<String,Object>)updatedValue.get("profile")).get("biometricInfo");
+        List<Object> arr = (List<Object>)updatedValue.get("biometricInfo");
 
         Map<String, Object> ret = new HashMap<>();
 
@@ -172,25 +207,56 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             i=0;
         }
 
-        ((Map<String,Object>)updatedValue.get("profile")).put("biometricInfo",ret);
+        updatedValue.put("biometricInfo",ret);
     }
 
-    void processLocationList(Map<String, Object> updatedValue){
-        if(updatedValue.get("profile") == null){
-            return;
-        }
-        else if( ((Map<String,Object>)updatedValue.get("profile")).get("location") == null ){
+    static void processLocationList(Map<String, Object> updatedValue){
+        if( updatedValue.get("location") == null ){
             return;
         }
 
-        List<Object> arr = (List<Object>)((Map<String,Object>)updatedValue.get("profile")).get("location");
+        List<Object> arr = (List<Object>)updatedValue.get("location");
 
         Map<String, Object> ret = new HashMap<>();
 
         for(int i=0;i<arr.size();i++){
             ret.put("hierarchy"+(i+1),arr.get(i));
         }
-        ((Map<String,Object>)updatedValue.get("profile")).put("location",ret);
+        updatedValue.put("location",ret);
+    }
+    static void processAgeGroup(Map<String, Object> updatedValue, String[] agList, String agOut){
+        if(updatedValue.get("date") == null || updatedValue.get("yearOfBirth") == null){
+            return;
+        }
+        int age = Integer.parseInt(((String)updatedValue.get("date")).split("-")[0])-(int)updatedValue.get("yearOfBirth");
+        int i;
+        for(i=0;i<agList.length-1;i++){
+            String[] ag = agList[i].trim().split("-");
+            if(age>=Integer.parseInt(ag[0]) && age<Integer.parseInt(ag[1])){
+                break;
+            }
+        }
+        updatedValue.put(agOut,agList[i].trim());
+    }
+    static void processChannel(Map<String, Object> updatedValue){
+        if(updatedValue.get("channel") == null){
+            return;
+        }
+        List<Object> channelList = (List<Object>)updatedValue.get("channel");
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("email",false);
+        ret.put("phone",false);
+        for(int i=0;i<channelList.size();i++){
+            if(channelList.get(i)!=null){
+              if(((String)channelList.get(i)).equals("email")){
+                  ret.put("email",true);
+              }
+              else if(((String)channelList.get(i)).equals("phone")){
+                  ret.put("phone",true);
+              }
+            }
+        }
+        updatedValue.put("channel",ret);
     }
 
 }
