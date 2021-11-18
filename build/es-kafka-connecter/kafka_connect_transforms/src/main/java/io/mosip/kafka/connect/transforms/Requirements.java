@@ -5,6 +5,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.apache.kafka.connect.data.Field;
 
 import java.util.Map;
 
@@ -54,6 +55,38 @@ public class Requirements {
 
     private static String nullSafeClassName(Object x) {
         return x == null ? "null" : x.getClass().getName();
+    }
+
+    public static Object getNestedField(Map<String,Object> tree, String field){
+        Object v=tree;
+        // System.out.println("===> Fields: "+field);
+        for(String subfield: field.split("\\.")){
+            v = ((Map<String,Object>)v).get(subfield);
+            if(v == null){
+                break;
+            }
+        }
+        return v;
+    }
+
+    public static Object getNestedField(Struct tree, String field){
+        Object[] ret = new Object[2];
+        ret[0]=null; ret[1]=null;
+        Object v=tree;
+        Object vSchema=null;
+        for(String subfield: field.split("\\.")){
+            try{
+                Object tmpField = ((Struct)v).schema().field(subfield);
+                if(tmpField!=null){
+                    vSchema=((Field)tmpField).schema();
+                }
+                v = ((Struct)v).get(subfield);
+            }
+            catch(DataException de){ return ret; }
+        }
+        ret[0]=v;
+        ret[1]=vSchema;
+        return ret;
     }
 
 }

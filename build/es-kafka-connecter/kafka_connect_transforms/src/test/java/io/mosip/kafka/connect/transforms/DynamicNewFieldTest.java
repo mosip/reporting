@@ -15,6 +15,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -35,10 +37,11 @@ public class DynamicNewFieldTest {
     public void testWithSchema() {
         Map<String, String> config = new HashMap<>();
         config.put(DynamicNewField.ES_URL_CONFIG, "http://localhost:9200");
-        config.put(DynamicNewField.ES_INDEX_CONFIG, System.getProperty("user.name")+"s_temp_reg_cen");
+        config.put(DynamicNewField.ES_INDEX_CONFIG, "testing_reg_cen");
         config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "id,lang_code");
         config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
         config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "regcntr_id,lang_code");
+        config.put(DynamicNewField.DEFAULT_VALUE_CONFIG, "null,null");
         config.put(DynamicNewField.OUTPUT_FIELD_CONFIG, "regcntr_name");
 
         xformValue.configure(config);
@@ -69,6 +72,43 @@ public class DynamicNewFieldTest {
         assertEquals("test", ((Struct) transformed.value()).get("other"));
     }
 
+    @Test
+    public void testSchemaless() {
+        Map<String, String> config = new HashMap<>();
+        config.put(DynamicNewField.ES_URL_CONFIG, "http://localhost:9200");
+        config.put(DynamicNewField.ES_INDEX_CONFIG, "qa_double_rc2.master.doc_type");
+        config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "code,lang_code");
+        config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
+        config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "profile.documents,lang_code");
+        config.put(DynamicNewField.DEFAULT_VALUE_CONFIG, "null,eng");
+        config.put(DynamicNewField.OUTPUT_FIELD_CONFIG, "doc_name");
+
+        xformValue.configure(config);
+
+        // ts field is a unix timestamp
+
+        Map<String, Object> original = new HashMap<>();
+        Map<String, Object> profile = new HashMap<>();
+
+        List<Object> list = new ArrayList<>();
+        list.add("CIN");
+        list.add("CRN");
+
+        profile.put("documents", list);
+        
+        original.put("profile", profile);
+        // original.put("lang_code", "enf");
+        original.put("other", "test");
+
+        SourceRecord transformed = xformValue.apply(createRecordSchemaless(original));
+
+        assertEquals(list, ((Map)((Map)transformed.value()).get("profile")).get("documents"));
+        // assertEquals("fra", ((Struct) transformed.value()).get("lang_code"));
+        assertEquals("Reference Identity Card", ((List)((Map)transformed.value()).get("doc_name")).get(0));
+        assertEquals("Certificate of Relationship", ((List)((Map)transformed.value()).get("doc_name")).get(1));
+
+        assertEquals("test", ((Map) transformed.value()).get("other"));
+    }
     // Test null Value: Schemaless : timestamp -> string
     // Not working somehow
     @Test
@@ -79,6 +119,7 @@ public class DynamicNewFieldTest {
         config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "id");
         config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
         config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "regcntr_id");
+        config.put(DynamicNewField.DEFAULT_VALUE_CONFIG, "null");
         config.put(DynamicNewField.OUTPUT_FIELD_CONFIG, "regcntr_name");
 
         xformValue.configure(config);

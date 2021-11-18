@@ -6,13 +6,13 @@
 #DB_PREFIX_INDEX=
 #ES_URL=
 
-CONN_NAME="prereg_applicant_document_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
+CONN_NAME="idrepo_channel_info$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
 
 DEBEZ_CONN_URL='debezium-service.reporting:8083'; # needn't change .. this is the debezium-connector service name
 ES_CONN_URL='es-connect.reporting:8083'; # needn't change .. this is the ES-connector service name
 
-DB_NAME='mosip_prereg'; # change this
-DB_TABLES='prereg.applicant_document,prereg.applicant_document_consumed'
+DB_NAME='mosip_idrepo'; # change this
+DB_TABLES='idrepo.channel_info'
 ES_INDICES=$(echo $DB_TABLES | sed -E "s/([^,]+)/$DB_PREFIX_INDEX.\1/g")
 
 curl \
@@ -33,44 +33,37 @@ curl \
           "key.converter": "org.apache.kafka.connect.storage.StringConverter",
           "value.converter": "org.apache.kafka.connect.json.JsonConverter",
           "key.converter.schemas.enable": "false",
-          "value.converter.schemas.enable": "true",
+          "value.converter.schemas.enable": "false",
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,tsconvert01,tsconvert02,tsconvert03,tsconvert04,tsSelect,join01",
+          "transforms": "ext1,debezExtract,tsconvert01,tsconvert02,tsconvert03,tsSelect",
 
+          "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.ext1.field": "payload",
           "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
           "transforms.debezExtract.delete.handling.mode": "drop",
           "transforms.debezExtract.drop.tombstones": "false",
           "transforms.debezExtract.add.fields": "source.ts_ms:ts_ms,table,lsn",
           "transforms.debezExtract.add.fields.prefix": "source_",
 
+
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "source_ts_ms",
+          "transforms.tsconvert01.field": "cr_dtimes",
+          "transforms.tsconvert01.input.type": "micro_sec",
 
           "transforms.tsconvert02.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert02.field": "encrypted_dtimes",
+          "transforms.tsconvert02.field": "upd_dtimes",
           "transforms.tsconvert02.input.type": "micro_sec",
 
           "transforms.tsconvert03.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert03.field": "cr_dtimes",
+          "transforms.tsconvert03.field": "del_dtimes",
           "transforms.tsconvert03.input.type": "micro_sec",
 
-          "transforms.tsconvert04.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert04.field": "upd_dtimes",
-          "transforms.tsconvert04.input.type": "micro_sec",
 
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
           "transforms.tsSelect.ts.order": "upd_dtimes,cr_dtimes",
-          "transforms.tsSelect.output.field": "@timestamp_gen",
+          "transforms.tsSelect.output.field": "@timestamp_gen"
 
-          "transforms.join01.type": "io.mosip.kafka.connect.transforms.DynamicNewField$Value",
-          "transforms.join01.es.index": '\"$DB_PREFIX_INDEX.master.doc_type\"',
-          "transforms.join01.es.url": '\"$ES_URL\"',
-          "transforms.join01.input.fields": "doc_typ_code,lang_code",
-          "transforms.join01.input.default.values": "null,eng",
-          "transforms.join01.es.input.fields": "code,lang_code",
-          "transforms.join01.es.output.field": "name",
-          "transforms.join01.output.field": "doc_type_name"
       }
 }';

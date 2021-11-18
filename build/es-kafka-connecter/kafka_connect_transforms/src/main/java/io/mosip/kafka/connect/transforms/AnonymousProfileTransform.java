@@ -35,30 +35,35 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
     public static final String PROFILES_FIELDS = "profiles.fields.list";
     public static final String AGE_GROUPS_FIELD = "age.groups.list";
     public static final String AGE_GROUPS_OUPUT_FIELD = "age.groups.output.field";
+    public static final String CHANNEL_GROUPS_FIELD = "channel.groups.list";
 
     private String[] profileFieldsList;
     private String[] ageGroupsList;
+    private String[] channelGroupList;
     private String ageGroupsOuputField;
 
     public static ConfigDef CONFIG_DEF = new ConfigDef()
         .define(PROFILES_FIELDS, ConfigDef.Type.STRING, "profile", ConfigDef.Importance.HIGH, "This is a list of profiles that have to be processed by this transform")
         .define(AGE_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the age groups in which it has to be categorised")
-        .define(AGE_GROUPS_OUPUT_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "the ouput field in which agegroup has to be put (w.r.t to the profile fields)");
+        .define(AGE_GROUPS_OUPUT_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "the ouput field in which agegroup has to be put (w.r.t to the profile fields)")
+        .define(CHANNEL_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the categories in which channel needs to be categorised, Code Hardcoded accoring to Both phone email, only phone, only email, None");
 
     @Override
     public void configure(Map<String, ?> configs) {
         AbstractConfig absconf = new AbstractConfig(CONFIG_DEF, configs, false);
         String prFL = absconf.getString(PROFILES_FIELDS);
         String agl = absconf.getString(AGE_GROUPS_FIELD);
+        String cgl = absconf.getString(CHANNEL_GROUPS_FIELD);
 
         ageGroupsOuputField = absconf.getString(AGE_GROUPS_OUPUT_FIELD);
 
         profileFieldsList = prFL.replaceAll("\\s+","").split(",");
         ageGroupsList = agl.split(",");
+        channelGroupList = cgl.split(",");
 
 
-        if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty()){
-            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD);
+        if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty() || cgl.isEmpty()){
+            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD + " ," + CHANNEL_GROUPS_FIELD);
         }
     }
 
@@ -144,7 +149,8 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
                 processBiometricList(updatedValue);
                 processLocationList(updatedValue);
                 processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField);
-                processChannel(updatedValue);
+                processChannel(updatedValue, channelGroupList);
+                processProcessName(updatedValue);
                 // rest of the transform funcs
             }
         }
@@ -238,25 +244,43 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         }
         updatedValue.put(agOut,agList[i].trim());
     }
-    static void processChannel(Map<String, Object> updatedValue){
+    static void processChannel(Map<String, Object> updatedValue, String[] agList){
+        
+        // agList expected in the form Both phone email, only phone, only email, None
         if(updatedValue.get("channel") == null){
             return;
         }
         List<Object> channelList = (List<Object>)updatedValue.get("channel");
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("email",false);
-        ret.put("phone",false);
-        for(int i=0;i<channelList.size();i++){
-            if(channelList.get(i)!=null){
-              if(((String)channelList.get(i)).equals("email")){
-                  ret.put("email",true);
-              }
-              else if(((String)channelList.get(i)).equals("phone")){
-                  ret.put("phone",true);
-              }
+
+        int channelsize = channelList.size();
+        int agListIndex = 3; // default to "None"
+
+        if(channelsize == 2){
+            agListIndex = 0;
+        }
+
+        else if(channelsize == 1){
+            String channelTxt = (channelList.get(0)).toString();
+            if(channelTxt.toLowerCase().equals("phone")){
+                agListIndex = 1;
+            }
+            else if(channelTxt.toLowerCase().equals("email")) {
+                agListIndex = 2;
             }
         }
-        updatedValue.put("channel",ret);
+        updatedValue.put("channel",agList[agListIndex].trim());
+    }
+
+    static void processProcessName(Map<String, Object> updatedValue){
+        if( updatedValue.get("processName") == null ){
+            return;
+        }
+
+        String pName = (String)updatedValue.get("processName");
+        pName = pName.toLowerCase();
+        String ret = pName.substring(0,1).toUpperCase() + pName.substring(1);
+
+        updatedValue.put("processName",ret);
     }
 
 }
