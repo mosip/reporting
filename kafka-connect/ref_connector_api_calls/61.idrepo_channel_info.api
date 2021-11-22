@@ -37,15 +37,12 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "ext1,debezExtract,tsconvert01,tsconvert02,tsconvert03,tsSelect",
+          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,tsSelect",
 
           "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
           "transforms.ext1.field": "payload",
-          "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
-          "transforms.debezExtract.delete.handling.mode": "drop",
-          "transforms.debezExtract.drop.tombstones": "false",
-          "transforms.debezExtract.add.fields": "source.ts_ms:ts_ms,table,lsn",
-          "transforms.debezExtract.add.fields.prefix": "source_",
+          "transforms.ext2.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.ext2.field": "after",
 
 
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",

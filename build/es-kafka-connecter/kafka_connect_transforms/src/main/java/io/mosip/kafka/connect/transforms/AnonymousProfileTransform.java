@@ -248,26 +248,34 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         
         // agList expected in the form Both phone email, only phone, only email, None
         if(updatedValue.get("channel") == null){
+            updatedValue.put("channel",agList[agList.length-1].trim());
             return;
         }
         List<Object> channelList = (List<Object>)updatedValue.get("channel");
 
-        int channelsize = channelList.size();
-        int agListIndex = 3; // default to "None"
+        boolean hasPhone = false;
+        boolean hasEmail = false;
+        int agListIndex;
 
-        if(channelsize == 2){
-            agListIndex = 0;
-        }
+        for(Object c : channelList){
+            
+            if(c == null) continue;
+            
+            String channelTxt = (String)c;
 
-        else if(channelsize == 1){
-            String channelTxt = (channelList.get(0)).toString();
             if(channelTxt.toLowerCase().equals("phone")){
-                agListIndex = 1;
+                hasPhone = true;
             }
             else if(channelTxt.toLowerCase().equals("email")) {
-                agListIndex = 2;
+                hasEmail = true;
             }
         }
+        
+        if(hasPhone && hasEmail) agListIndex = 0;
+        else if(hasPhone) agListIndex = 1;
+        else if(hasEmail) agListIndex = 2;
+        else agListIndex = agList.length - 1;
+
         updatedValue.put("channel",agList[agListIndex].trim());
     }
 
