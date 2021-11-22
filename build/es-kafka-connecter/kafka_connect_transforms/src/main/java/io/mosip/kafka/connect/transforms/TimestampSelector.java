@@ -145,7 +145,7 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
 
         Object ret=null;
         for(String field : config.tsOrder){
-            ret = getNestedField(value,field);
+            ret = Requirements.getNestedField(value,field);
             if(ret!=null){ break; }
         }
         if(ret==null){
@@ -163,7 +163,7 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
         Object ret=null;
         Object outSchema=null;
         for(String field : config.tsOrder){
-            Object tmp = getNestedField(value,field);
+            Object tmp = Requirements.getNestedField(value,field);
             ret = ((Object[])tmp)[0]; outSchema = ((Object[])tmp)[1];
             if(ret!=null)if(!ret.equals("")) break;
         }
@@ -200,36 +200,5 @@ public abstract class TimestampSelector<R extends ConnectRecord<R>> implements T
         return builder.build();
     }
 
-    static Object getNestedField(Map<String,Object> tree, String field){
-        Object v=tree;
-        System.out.println("===> Fields: "+field);
-        for(String subfield: field.split("\\.")){
-            v = ((Map<String,Object>)v).get(subfield);
-            if(v == null){
-                break;
-            }
-        }
-        return v;
-    }
-
-    static Object getNestedField(Struct tree, String field){
-        Object[] ret = new Object[2];
-        ret[0]=null; ret[1]=null;
-        Object v=tree;
-        Object vSchema=null;
-        for(String subfield: field.split("\\.")){
-            try{
-                Object tmpField = ((Struct)v).schema().field(subfield);
-                if(tmpField!=null){
-                    vSchema=((Field)tmpField).schema();
-                }
-                v = ((Struct)v).get(subfield);
-            }
-            catch(DataException de){ return ret; }
-        }
-        ret[0]=v;
-        ret[1]=vSchema;
-        return ret;
-    }
 
 }

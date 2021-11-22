@@ -37,7 +37,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,tsSelect",
+          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,tsSelect,join01",
 
           "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
           "transforms.ext1.field": "payload",
@@ -63,9 +63,19 @@ curl \
           "transforms.anonTransform.profiles.fields.list": "profile",
           "transforms.anonTransform.age.groups.list": "0-5, 5-18, 18-60, 60 and above",
           "transforms.anonTransform.age.groups.output.field": "ageGroup",
+          "transforms.anonTransform.channel.groups.list": "Both phone and email,only phone,only email,None",
 
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
           "transforms.tsSelect.ts.order": "profile.date,upd_dtimes,cr_dtimes",
-          "transforms.tsSelect.output.field": "@timestamp_gen"
+          "transforms.tsSelect.output.field": "@timestamp_gen",
+
+          "transforms.join01.type": "io.mosip.kafka.connect.transforms.DynamicNewField$Value",
+          "transforms.join01.es.index": '\"$DB_PREFIX_INDEX.master.doc_type\"',
+          "transforms.join01.es.url": '\"$ES_URL\"',
+          "transforms.join01.input.fields": "profile.documents,lang_code",
+          "transforms.join01.input.default.values": "null,eng",
+          "transforms.join01.es.input.fields": "code,lang_code",
+          "transforms.join01.es.output.field": "name",
+          "transforms.join01.output.field": "documents_names"
       }
 }';

@@ -83,6 +83,7 @@ curl \
           "transforms.join01.es.index": '\"$DB_PREFIX_INDEX.master.registration_center\"',
           "transforms.join01.es.url": '\"$ES_URL\"',
           "transforms.join01.input.fields": "regcntr_id",
+          "transforms.join01.input.default.values": "null",
           "transforms.join01.es.input.fields": "id",
           "transforms.join01.es.output.field": "name",
           "transforms.join01.output.field": "regcntr_name"
