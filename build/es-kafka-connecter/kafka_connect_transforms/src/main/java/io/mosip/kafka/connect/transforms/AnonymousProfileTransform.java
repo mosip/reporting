@@ -16,6 +16,15 @@ import org.apache.kafka.connect.data.Struct;
 
 import org.apache.commons.codec.binary.Base64;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.json.JSONArray;
@@ -36,6 +45,8 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
     public static final String AGE_GROUPS_FIELD = "age.groups.list";
     public static final String AGE_GROUPS_OUPUT_FIELD = "age.groups.output.field";
     public static final String CHANNEL_GROUPS_FIELD = "channel.groups.list";
+    public static final String TOPIC_NAME_FIELD = "kafka.topic.name";
+    public static final String ES_URL_FIELD = "es.url";
 
     private String[] profileFieldsList;
     private String[] ageGroupsList;
@@ -46,7 +57,9 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         .define(PROFILES_FIELDS, ConfigDef.Type.STRING, "profile", ConfigDef.Importance.HIGH, "This is a list of profiles that have to be processed by this transform")
         .define(AGE_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the age groups in which it has to be categorised")
         .define(AGE_GROUPS_OUPUT_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "the ouput field in which agegroup has to be put (w.r.t to the profile fields)")
-        .define(CHANNEL_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the categories in which channel needs to be categorised, Code Hardcoded accoring to Both phone email, only phone, only email, None");
+        .define(CHANNEL_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the categories in which channel needs to be categorised, Code Hardcoded accoring to Both phone email, only phone, only email, None")
+        .define(TOPIC_NAME_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Current Transform's topic name")
+        .define(ES_URL_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Elasticseach url");
 
     @Override
     public void configure(Map<String, ?> configs) {
@@ -54,6 +67,8 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         String prFL = absconf.getString(PROFILES_FIELDS);
         String agl = absconf.getString(AGE_GROUPS_FIELD);
         String cgl = absconf.getString(CHANNEL_GROUPS_FIELD);
+        String esUrl = absconf.getString(ES_URL_FIELD);
+        String kafkaTopicName = absconf.getString(TOPIC_NAME_FIELD);
 
         ageGroupsOuputField = absconf.getString(AGE_GROUPS_OUPUT_FIELD);
 
@@ -61,10 +76,11 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         ageGroupsList = agl.split(",");
         channelGroupList = cgl.split(",");
 
-
-        if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty() || cgl.isEmpty()){
-            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD + " ," + CHANNEL_GROUPS_FIELD);
+        if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty() || cgl.isEmpty() || esUrl.isEmpty() || kafkaTopicName.isEmpty()){
+            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD + " ," + CHANNEL_GROUPS_FIELD + " ,"+ TOPIC_NAME_FIELD + " ," + ES_URL_FIELD);
         }
+
+        esPutMapping(esUrl,kafkaTopicName);
     }
 
     @Override
@@ -154,6 +170,9 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
                 // rest of the transform funcs
             }
         }
+        // call non profile related funcs here
+        processRegistrationCenter(updatedValueRoot);
+        // updatedValueRoot = processSchemasForSchemaLess(updatedValueRoot);
 
         return newRecord(record, null, updatedValueRoot);
     }
@@ -245,7 +264,7 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         updatedValue.put(agOut,agList[i].trim());
     }
     static void processChannel(Map<String, Object> updatedValue, String[] agList){
-        
+
         // agList expected in the form Both phone email, only phone, only email, None
         if(updatedValue.get("channel") == null){
             updatedValue.put("channel",agList[agList.length-1].trim());
@@ -258,9 +277,9 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         int agListIndex;
 
         for(Object c : channelList){
-            
+
             if(c == null) continue;
-            
+
             String channelTxt = (String)c;
 
             if(channelTxt.toLowerCase().equals("phone")){
@@ -270,7 +289,7 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
                 hasEmail = true;
             }
         }
-        
+
         if(hasPhone && hasEmail) agListIndex = 0;
         else if(hasPhone) agListIndex = 1;
         else if(hasEmail) agListIndex = 2;
@@ -289,6 +308,55 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         String ret = pName.substring(0,1).toUpperCase() + pName.substring(1);
 
         updatedValue.put("processName",ret);
+    }
+    static void processRegistrationCenter(Map<String,Object> updateValue){
+        if(updateValue.get("temp_latitude")==null || updateValue.get("temp_longitude")==null){
+            return;
+        }
+
+        String ret = "";
+
+        ret+=(String)updateValue.get("temp_latitude");
+        ret+=",";
+        ret+=(String)updateValue.get("temp_longitude");
+        try{
+            updateValue.remove("temp_latitude");
+            updateValue.remove("temp_longitude");
+        }
+        catch(Exception e){
+            throw new DataException("Geolocation processing: Something wrong with latitude and longitude");
+        }
+        updateValue.put("registrationCenterGeoLocation",ret);
+    }
+    // static Map<String,Object> processSchemasForSchemaLess(Map<String,Object> updateValue){
+    //     returnValue = new HashMap<String, Object>();
+    //     returnValue.put("payload",updateValue);
+    //
+    //     Map<String, Object> mSchema = new HashMap<String, Object>();
+    //     mSchema.put("type","geo_point");
+    //     mSchema.put("field","registrationCenterGeoLocation");
+    //     returnValue.put("schema",mSchema);
+    //
+    //     return returnValue;
+    // }
+
+    static void esPutMapping(String esUrl, String topicName){
+        String sRequest= "{\"mappings\": {\"properties\": {\"registrationCenterGeoLocation\": {\"type\": \"geo_point\"}}}}";
+
+        CloseableHttpClient hClient= HttpClients.createDefault();
+        HttpPut hPut = new HttpPut(esUrl+"/"+topicName+"/");
+        hPut.setHeader("Content-type", "application/json");
+        hPut.setEntity(new StringEntity(sRequest));
+        try(CloseableHttpResponse hResponse = hClient.execute(hPut)){
+            HttpEntity entity = hResponse.getEntity();
+            String jsonString = EntityUtils.toString(entity);
+            if(hResponse.getCode()!=200){
+                throw new ConfigException("Unsuccessful while putting mapping : " + jsonString);
+            }
+        }
+        catch(Exception e){
+            throw new ConfigException("In Exception: Unsuccessful while putting mapping : "+e);
+        }
     }
 
 }
