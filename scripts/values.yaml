@@ -8,6 +8,8 @@ bitnami-kafka:
 # Debezium kafka connector
 debezium:
   enabled: true
+  # fixer_container:
+  #   image: mosipdev/debezium-fixer:develop
   # If kafka is preinstalled, specify how it can be reached here
   # kafka:
   #   server: "kafka:9092"
