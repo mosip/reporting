@@ -13,12 +13,13 @@ import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
-
 import org.apache.commons.codec.binary.Base64;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.Header;
@@ -30,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONArray;
 
 import java.util.Arrays;
+// import java.util.Base64;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,11 +49,18 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
     public static final String CHANNEL_GROUPS_FIELD = "channel.groups.list";
     public static final String TOPIC_NAME_FIELD = "kafka.topic.name";
     public static final String ES_URL_FIELD = "es.url";
+    public static final String TRANSFORM_FUNCTIONS_PROFILE = "profile.listOfFunctions";
+    public static final String TRANSFORM_FUNCTIONS = "listOfFunctions";
 
     private String[] profileFieldsList;
     private String[] ageGroupsList;
     private String[] channelGroupList;
+    private String[] functionsList;
+    private String[] functionsListProfile;
     private String ageGroupsOuputField;
+    private String elasticSearchURL;
+    private String esTopicName;
+    // private Base64 base64;
 
     public static ConfigDef CONFIG_DEF = new ConfigDef()
         .define(PROFILES_FIELDS, ConfigDef.Type.STRING, "profile", ConfigDef.Importance.HIGH, "This is a list of profiles that have to be processed by this transform")
@@ -59,7 +68,9 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         .define(AGE_GROUPS_OUPUT_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "the ouput field in which agegroup has to be put (w.r.t to the profile fields)")
         .define(CHANNEL_GROUPS_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Give the categories in which channel needs to be categorised, Code Hardcoded accoring to Both phone email, only phone, only email, None")
         .define(TOPIC_NAME_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Current Transform's topic name")
-        .define(ES_URL_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Elasticseach url");
+        .define(ES_URL_FIELD, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Elasticseach url")
+        .define(TRANSFORM_FUNCTIONS_PROFILE, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "List of functions to be applied on the profile")
+        .define(TRANSFORM_FUNCTIONS, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "List of functions to be applied on the record outside profile");
 
     @Override
     public void configure(Map<String, ?> configs) {
@@ -69,15 +80,25 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         String cgl = absconf.getString(CHANNEL_GROUPS_FIELD);
         String esUrl = absconf.getString(ES_URL_FIELD);
         String kafkaTopicName = absconf.getString(TOPIC_NAME_FIELD);
+        String listOfFunctionsProfile = absconf.getString(TRANSFORM_FUNCTIONS_PROFILE);
+        String listOfFunctions = absconf.getString(TRANSFORM_FUNCTIONS);
 
         ageGroupsOuputField = absconf.getString(AGE_GROUPS_OUPUT_FIELD);
+
+        elasticSearchURL = esUrl;
+        esTopicName = kafkaTopicName;
 
         profileFieldsList = prFL.replaceAll("\\s+","").split(",");
         ageGroupsList = agl.split(",");
         channelGroupList = cgl.split(",");
+        functionsList = listOfFunctions.replaceAll("\\s+","").split(",");
+        functionsListProfile = listOfFunctionsProfile.replaceAll("\\s+","").split(",");
+
+        // Base64 base64 = new Base64();
 
         if(prFL.isEmpty() || agl.isEmpty() || ageGroupsOuputField.isEmpty() || cgl.isEmpty() || esUrl.isEmpty() || kafkaTopicName.isEmpty()){
-            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD + " ," + CHANNEL_GROUPS_FIELD + " ,"+ TOPIC_NAME_FIELD + " ," + ES_URL_FIELD);
+            throw new ConfigException("All the required fields are not set. Required Fields: " + PROFILES_FIELDS + " ," + AGE_GROUPS_FIELD + " ," + AGE_GROUPS_OUPUT_FIELD + 
+            " ," + CHANNEL_GROUPS_FIELD + " ,"+ TOPIC_NAME_FIELD + " ," + ES_URL_FIELD);
         }
 
         esPutMapping(esUrl,kafkaTopicName);
@@ -161,19 +182,37 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             catch(Exception e){
                 throw new ConfigException("Improper profile fields list. Some of the given fields are not found. Given List: " + profileFieldsList + "\n Exception details: " + e);
             }
+            
             if(updatedValue != null){
-                processBiometricList(updatedValue);
-                processLocationList(updatedValue);
-                processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField);
-                processChannel(updatedValue, channelGroupList);
-                processProcessName(updatedValue);
+                for(String func : functionsListProfile){
+        
+                    switch (func) {
+                        case "processBiometricList": processBiometricList(updatedValue); break;
+                        case "processAgeGroup": processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField);; break;
+                        case "processChannel": processChannel(updatedValue, channelGroupList); break;
+                        case "processProcessName": processProcessName(updatedValue); break;
+                        case "processAssister": processAssister(updatedValue); break;
+                        case "processLocationList": processLocationList(updatedValue); break;     
+                        case "processUpdateProfile": processUpdateProfile(updatedValue, elasticSearchURL, esTopicName); break;               
+                        default: break;
+                    }
+                    
                 // rest of the transform funcs
+                }    
             }
         }
         // call non profile related funcs here
-        processRegistrationCenter(updatedValueRoot);
+
+        for(String func : functionsList){
+            switch (func) {
+                case "processRegistrationCenter": processRegistrationCenter(updatedValueRoot); break;
+                default: break;
+            }
+        }
+
         // updatedValueRoot = processSchemasForSchemaLess(updatedValueRoot);
 
+        
         return newRecord(record, null, updatedValueRoot);
     }
 
@@ -249,6 +288,22 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         }
         updatedValue.put("location",ret);
     }
+    
+    static void processAssister(Map<String, Object> updatedValue){
+        if( updatedValue.get("assisted") == null ){
+            return;
+        }
+
+        List<Object> arr = (List<Object>)updatedValue.get("assisted"); 
+
+        Map<String, Object> ret = new HashMap<>();
+
+        ret.put("Operator",(String)arr.get(0));
+        ret.put("Supervisor",(String)arr.get(1));
+        
+        updatedValue.put("registrationOfficers",ret);
+    }
+
     static void processAgeGroup(Map<String, Object> updatedValue, String[] agList, String agOut){
         if(updatedValue.get("date") == null || updatedValue.get("yearOfBirth") == null){
             return;
@@ -263,6 +318,7 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         }
         updatedValue.put(agOut,agList[i].trim());
     }
+    
     static void processChannel(Map<String, Object> updatedValue, String[] agList){
 
         // agList expected in the form Both phone email, only phone, only email, None
@@ -309,6 +365,67 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
 
         updatedValue.put("processName",ret);
     }
+
+    static void processUpdateProfile(Map<String, Object> updatedValue, String esUrl, String topicName){
+        if(updatedValue.get("oldProfile") == null && updatedValue.get("newProfile") == null){
+            return;
+        }
+
+        Base64 base64 = new Base64(); 
+
+        
+        JSONObject newProfile = new JSONObject((HashMap<String,Object>)updatedValue.get("newProfile"));
+        String newProfileString = newProfile.toString();
+        String newUpdateID = new String(base64.encode(newProfileString.getBytes()));
+        updatedValue.put("updateId",newUpdateID);
+
+        if(updatedValue.get("oldProfile") == null) return;
+
+        JSONObject oldProfile = new JSONObject((HashMap<String,Object>)updatedValue.get("oldProfile"));
+        String oldProfileString = oldProfile.toString();
+        String oldUpdateID = new String(base64.encode(oldProfileString.getBytes()));
+
+
+        String query = "{\"query\": {\"term\": {\"profile.updateId\":\"" + oldUpdateID +"\"}},\"size\": 1}";
+        JSONObject responseJson;
+
+        CloseableHttpClient hClient= HttpClients.createDefault();
+        HttpGet hGet = new HttpGet(esUrl+"/"+topicName+"/_search");
+        
+        hGet.setHeader("Content-type", "application/json");
+        hGet.setEntity(new StringEntity(query));
+
+        
+        String deleteId;
+        try(CloseableHttpResponse hResponse = hClient.execute(hGet)){
+            HttpEntity entity = hResponse.getEntity();
+            String jsonString = EntityUtils.toString(entity);
+            responseJson = new JSONObject(jsonString);
+            deleteId = responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getString("_id");
+            if(hResponse.getCode()!=200){
+                throw new ConfigException("Unsuccessful while getting hits : " + jsonString);
+            }
+        }
+        catch(Exception e){
+            throw new DataException("In Exception: Unsuccessful while getting hits : "+e);
+        }
+
+        HttpDelete hDelete = new HttpDelete(esUrl+"/"+topicName+"/_doc/"+deleteId);
+
+        try(CloseableHttpResponse hResponse = hClient.execute(hDelete)){
+            HttpEntity entity = hResponse.getEntity();
+            String jsonString = EntityUtils.toString(entity);
+            if(hResponse.getCode()!=200){
+                throw new ConfigException("Unsuccessful while deleting record: " + jsonString);
+            }
+        }
+        catch(Exception e){
+            throw new ConfigException("In Exception: Unsuccessful while deleting record : "+e);
+        }
+       
+        return;
+    }
+
     static void processRegistrationCenter(Map<String,Object> updateValue){
         if(updateValue.get("temp_latitude")==null || updateValue.get("temp_longitude")==null){
             return;
@@ -341,7 +458,7 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
     // }
 
     static void esPutMapping(String esUrl, String topicName){
-        String sRequest= "{\"mappings\": {\"properties\": {\"registrationCenterGeoLocation\": {\"type\": \"geo_point\"}}}}";
+        String sRequest= "{\"mappings\": {\"properties\": {\"registrationCenterGeoLocation\": {\"type\": \"geo_point\"}, \"profile\": {\"properties\": {\"updateId\": {\"type\": \"keyword\"}}}}}}";
 
         CloseableHttpClient hClient= HttpClients.createDefault();
         HttpPut hPut = new HttpPut(esUrl+"/"+topicName+"/");
