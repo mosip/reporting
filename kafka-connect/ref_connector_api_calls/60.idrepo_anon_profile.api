@@ -8,8 +8,7 @@
 
 CONN_NAME="idrepo_anon_profile_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
 
-DEBEZ_CONN_URL='debezium-service.reporting:8083'; # needn't change .. this is the debezium-connector service name
-ES_CONN_URL='es-connect.reporting:8083'; # needn't change .. this is the ES-connector service name
+ES_CONN_URL='es-connect:8083'; # needn't change .. this is the ES-connector service name
 
 DB_NAME='mosip_idrepo'; # change this
 DB_TABLES='idrepo.anonymous_profile'
@@ -37,7 +36,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,tsSelect,stringtojson01",
+          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,anonTransformProfile,join01,join02,tsSelect",
 
           "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
           "transforms.ext1.field": "payload",
@@ -56,11 +55,50 @@ curl \
           "transforms.tsconvert03.field": "del_dtimes",
           "transforms.tsconvert03.input.type": "micro_sec",
 
+          "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
+          "transforms.stringtojson01.input.field": "profile",
+        
+          "transforms.anonTransform.type": "io.mosip.kafka.connect.transforms.AnonymousProfileTransform$Value",
+          "transforms.anonTransform.profiles.fields.list": "profile",
+          "transforms.anonTransform.age.groups.list": "0-5, 5-18, 18-60, 60 and above",
+          "transforms.anonTransform.age.groups.output.field": "ageGroup",
+          "transforms.anonTransform.channel.groups.list": "Both phone and email,only phone,only email,None",
+          "transforms.anonTransform.es.url": '\"$ES_URL\"',
+          "transforms.anonTransform.kafka.topic.name": '\"$ES_INDICES\"',
+          "transforms.anonTransform.profile.listOfFunctions": "processUpdateProfile",
+          "transforms.anonTransform.listOfFunctions": "",
+
+          "transforms.anonTransformProfile.type": "io.mosip.kafka.connect.transforms.AnonymousProfileTransform$Value",
+          "transforms.anonTransformProfile.profiles.fields.list": "profile.oldProfile,profile.newProfile",
+          "transforms.anonTransformProfile.age.groups.list": "0-5, 5-18, 18-60, 60 and above",
+          "transforms.anonTransformProfile.age.groups.output.field": "ageGroup",
+          "transforms.anonTransformProfile.channel.groups.list": "Both phone and email,only phone,only email,None",
+          "transforms.anonTransformProfile.es.url": '\"$ES_URL\"',
+          "transforms.anonTransformProfile.kafka.topic.name": '\"$ES_INDICES\"',
+          "transforms.anonTransformProfile.profile.listOfFunctions": "processBiometricList,processAgeGroup,processChannel,processProcessName,processLocationList",
+          "transforms.anonTransformProfile.listOfFunctions": "",
+
+          "transforms.join01.type": "io.mosip.kafka.connect.transforms.DynamicNewField$Value",
+          "transforms.join01.es.index": '\"$DB_PREFIX_INDEX.master.doc_type\"',
+          "transforms.join01.es.url": '\"$ES_URL\"',
+          "transforms.join01.input.fields": "profile.oldProfile.documents,lang_code",
+          "transforms.join01.input.default.values": "null,eng",
+          "transforms.join01.es.input.fields": "code,lang_code",
+          "transforms.join01.es.output.field": "name",
+          "transforms.join01.output.field": "documents_names",
+
+          "transforms.join02.type": "io.mosip.kafka.connect.transforms.DynamicNewField$Value",
+          "transforms.join02.es.index": '\"$DB_PREFIX_INDEX.master.doc_type\"',
+          "transforms.join02.es.url": '\"$ES_URL\"',
+          "transforms.join02.input.fields": "profile.newProfile.documents,lang_code",
+          "transforms.join02.input.default.values": "null,eng",
+          "transforms.join02.es.input.fields": "code,lang_code",
+          "transforms.join02.es.output.field": "name",
+          "transforms.join02.output.field": "documents_names",
+
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
           "transforms.tsSelect.ts.order": "upd_dtimes,cr_dtimes",
-          "transforms.tsSelect.output.field": "@timestamp_gen",
+          "transforms.tsSelect.output.field": "@timestamp_gen"
 
-          "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
-          "transforms.stringtojson01.input.field": "profile"
       }
 }';

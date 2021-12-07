@@ -76,36 +76,36 @@ public class DynamicNewFieldTest {
     public void testSchemaless() {
         Map<String, String> config = new HashMap<>();
         config.put(DynamicNewField.ES_URL_CONFIG, "http://localhost:9200");
-        config.put(DynamicNewField.ES_INDEX_CONFIG, "qa_double_rc2.master.doc_type");
-        config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "code,lang_code");
+        config.put(DynamicNewField.ES_INDEX_CONFIG, "testing_reg_cen");
+        config.put(DynamicNewField.ES_INPUT_FIELDS_CONFIG, "id,lang_code");
         config.put(DynamicNewField.ES_OUTPUT_FIELD_CONFIG, "name");
-        config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "profile.documents,lang_code");
-        config.put(DynamicNewField.DEFAULT_VALUE_CONFIG, "null,eng");
-        config.put(DynamicNewField.OUTPUT_FIELD_CONFIG, "doc_name");
+        config.put(DynamicNewField.INPUT_FIELDS_CONFIG, "regcntr_id,lang_code");
+        config.put(DynamicNewField.DEFAULT_VALUE_CONFIG, "null,null");
+        config.put(DynamicNewField.OUTPUT_FIELD_CONFIG, "regcntr_name");
 
         xformValue.configure(config);
 
         // ts field is a unix timestamp
 
         Map<String, Object> original = new HashMap<>();
-        Map<String, Object> profile = new HashMap<>();
+        // Map<String, Object> profile = new HashMap<>();
 
         List<Object> list = new ArrayList<>();
-        list.add("CIN");
-        list.add("CRN");
+        list.add("eng");
+        list.add("fra");
 
-        profile.put("documents", list);
+        // profile.put("lang_code", list);
         
-        original.put("profile", profile);
-        // original.put("lang_code", "enf");
+        original.put("regcntr_id", "10001");
+        original.put("lang_code", list);
         original.put("other", "test");
 
         SourceRecord transformed = xformValue.apply(createRecordSchemaless(original));
 
-        assertEquals(list, ((Map)((Map)transformed.value()).get("profile")).get("documents"));
+        assertEquals(list, ((Map)transformed.value()).get("lang_code"));
         // assertEquals("fra", ((Struct) transformed.value()).get("lang_code"));
-        assertEquals("Reference Identity Card", ((List)((Map)transformed.value()).get("doc_name")).get(0));
-        assertEquals("Certificate of Relationship", ((List)((Map)transformed.value()).get("doc_name")).get(1));
+        assertEquals("REGCEN1", ((List)((Map)transformed.value()).get("regcntr_name")).get(0));
+        assertEquals("REGCEN12", ((List)((Map)transformed.value()).get("regcntr_name")).get(1));
 
         assertEquals("test", ((Map) transformed.value()).get("other"));
     }

@@ -8,7 +8,7 @@
 #DB_TABLES=
 #DB_PREFIX_INDEX=
 
-DEBEZ_CONN_URL='debezium-service.reporting:8083'; # needn't change .. this is the debezium-connector service name
+DEBEZ_CONN_URL='debezium-service:8083'; # needn't change .. this is the debezium-connector service name
 
 curl \
   -X POST \

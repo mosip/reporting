@@ -8,8 +8,7 @@
 
 CONN_NAME="regprc_anon_profile_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
 
-DEBEZ_CONN_URL='debezium-service.reporting:8083'; # needn't change .. this is the debezium-connector service name
-ES_CONN_URL='es-connect.reporting:8083'; # needn't change .. this is the ES-connector service name
+ES_CONN_URL='es-connect:8083'; # needn't change .. this is the ES-connector service name
 
 DB_NAME='mosip_regprc'; # change this
 DB_TABLES='regprc.anonymous_profile'
@@ -93,9 +92,11 @@ curl \
           "transforms.anonTransform.channel.groups.list": "Both phone and email,only phone,only email,None",
           "transforms.anonTransform.es.url": '\"$ES_URL\"',
           "transforms.anonTransform.kafka.topic.name": '\"$ES_INDICES\"',
+          "transforms.anonTransform.profile.listOfFunctions": "processBiometricList,processAgeGroup,processChannel,processProcessName,processAssister,processLocationList",
+          "transforms.anonTransform.listOfFunctions": "processRegistrationCenter",
 
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
-          "transforms.tsSelect.ts.order": "profile.date,upd_dtimes,cr_dtimes",
+          "transforms.tsSelect.ts.order": "upd_dtimes,cr_dtimes",
           "transforms.tsSelect.output.field": "@timestamp_gen"
       }
 }';
