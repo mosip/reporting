@@ -297,9 +297,10 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         List<Object> arr = (List<Object>)updatedValue.get("assisted"); 
 
         Map<String, Object> ret = new HashMap<>();
-
-        ret.put("Operator",(String)arr.get(0));
-        ret.put("Supervisor",(String)arr.get(1));
+        
+        if(arr.size() == 0) return;
+        if(arr.size() >= 1) ret.put("Operator",(String)arr.get(0));
+        if(arr.size() >= 2) ret.put("Supervisor",(String)arr.get(1));
         
         updatedValue.put("registrationOfficers",ret);
     }
@@ -371,9 +372,10 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             return;
         }
 
+        if(updatedValue.get("newProfile") == null) return;
+
         Base64 base64 = new Base64(); 
 
-        
         JSONObject newProfile = new JSONObject((HashMap<String,Object>)updatedValue.get("newProfile"));
         String newProfileString = newProfile.toString();
         String newUpdateID = new String(base64.encode(newProfileString.getBytes()));
@@ -403,11 +405,13 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             responseJson = new JSONObject(jsonString);
             deleteId = responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getString("_id");
             if(hResponse.getCode()!=200){
-                throw new ConfigException("Unsuccessful while getting hits : " + jsonString);
+                System.out.println(">>>>>>> Unsuccessful while getting hits : " + jsonString);
+                return;
             }
         }
         catch(Exception e){
-            throw new DataException("In Exception: Unsuccessful while getting hits : "+e);
+            System.out.println(">>>>>>> In Exception: Unsuccessful while getting hits : "+e);
+            return;
         }
 
         HttpDelete hDelete = new HttpDelete(esUrl+"/"+topicName+"/_doc/"+deleteId);
@@ -468,11 +472,11 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             HttpEntity entity = hResponse.getEntity();
             String jsonString = EntityUtils.toString(entity);
             if(hResponse.getCode()!=200){
-                throw new ConfigException("Unsuccessful while putting mapping : " + jsonString);
+                System.out.println(">>>>>>>Unsuccessful while putting mapping : " + jsonString);
             }
         }
         catch(Exception e){
-            throw new ConfigException("In Exception: Unsuccessful while putting mapping : "+e);
+            System.out.println(">>>>>>>In Exception: Unsuccessful while putting mapping : "+e);
         }
     }
 
