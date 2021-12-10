@@ -168,9 +168,11 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
 
     private R applySchemaless(R record) {
         final Map<String, Object> value = Requirements.requireMap(operatingValue(record), PURPOSE);
+        // final Map<String, Object> key = Requirements.requireMap(record.key(), PURPOSE);
 
         Map<String, Object> updatedValueRoot = new HashMap<>(value);
-
+        // Map<String, Object> updatedKeyRoot = new HashMap<>(key);
+        String date = (String)Requirements.getNestedField(updatedValueRoot,"profile.date");
         for(int i=0; i<profileFieldsList.length ; i++){
             Map<String, Object> updatedValue = updatedValueRoot;
             String[] profHierar = (profileFieldsList[i]).split("\\.");
@@ -188,7 +190,7 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         
                     switch (func) {
                         case "processBiometricList": processBiometricList(updatedValue); break;
-                        case "processAgeGroup": processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField);; break;
+                        case "processAgeGroup": processAgeGroup(updatedValue,ageGroupsList,ageGroupsOuputField,date); break;
                         case "processChannel": processChannel(updatedValue, channelGroupList); break;
                         case "processProcessName": processProcessName(updatedValue); break;
                         case "processAssister": processAssister(updatedValue); break;
@@ -212,9 +214,15 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
 
         // updatedValueRoot = processSchemasForSchemaLess(updatedValueRoot);
 
+
+        // record.newRecord(record.topic(), record.kafkaPartition(), null, updatedKey, null, updatedValueRoot, record.timestamp());
         
         return newRecord(record, null, updatedValueRoot);
     }
+
+    // static String extractId(Map<String, Object> updatedKey){
+    //     return updatedKey.get('payload')
+    // } 
 
     static void processBiometricList(Map<String, Object> updatedValue){
         if( updatedValue.get("biometricInfo") == null ){
@@ -236,9 +244,17 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             for(j=i;j<arr.size();j++){
                 Map<String, Object> each = (Map<String, Object>)arr.get(j);
                 if(((String)each.get("type")).equals(mtype)) {
-                    qualScoreSum+=(int)each.get("qualityScore");
-                    attemptsSum+=Integer.parseInt((String)m.get("attempts"));
-                    count++;
+                    try{
+                        int q =(int)each.get("qualityScore");
+                        int a =Integer.parseInt((String)each.get("attempts"));
+                        count++;
+
+                        qualScoreSum += q;
+                        attemptsSum += a;
+                    }
+                    catch(Exception e){
+                        System.out.println(">>>>>>> " + e);
+                    }
                     arr.remove(j--);
                 }
                 else{
@@ -263,8 +279,10 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
                     }
                 }
             }
-            m.put("attempts",attemptsSum/count);
-            m.put("qualityScore", qualScoreSum/count);
+
+
+            m.put("attempts",count == 0 ? 0 : attemptsSum/count);
+            m.put("qualityScore", count == 0 ? 0 : qualScoreSum/count);
 
             ret.put(mtype,m);
 
@@ -305,11 +323,12 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         updatedValue.put("registrationOfficers",ret);
     }
 
-    static void processAgeGroup(Map<String, Object> updatedValue, String[] agList, String agOut){
-        if(updatedValue.get("date") == null || updatedValue.get("yearOfBirth") == null){
+    static void processAgeGroup(Map<String, Object> updatedValue, String[] agList, String agOut, String date){
+        if(date == null || updatedValue.get("yearOfBirth") == null){
             return;
         }
-        int age = Integer.parseInt(((String)updatedValue.get("date")).split("-")[0])-(int)updatedValue.get("yearOfBirth");
+
+        int age = Integer.parseInt(date.split("-")[0])-(int)updatedValue.get("yearOfBirth");
         int i;
         for(i=0;i<agList.length-1;i++){
             String[] ag = agList[i].trim().split("-");
@@ -420,11 +439,11 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
             HttpEntity entity = hResponse.getEntity();
             String jsonString = EntityUtils.toString(entity);
             if(hResponse.getCode()!=200){
-                throw new ConfigException("Unsuccessful while deleting record: " + jsonString);
+                System.out.println(">>>>>>> Unsuccessful while deleting record: " + jsonString);
             }
         }
         catch(Exception e){
-            throw new ConfigException("In Exception: Unsuccessful while deleting record : "+e);
+            System.out.println(">>>>>>> In Exception: Unsuccessful while deleting record : "+e);
         }
        
         return;
