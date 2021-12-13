@@ -23,7 +23,7 @@ curl \
           "publication.autocreate.mode": "filtered",
           "slot.name": '\"debezium_"$DB_NAME"_"$DB_PREFIX_INDEX"\"',
           "slot.drop.on.stop": "true",
-          "publication.name": '\"dbz_pub_$DB_PREFIX_INDEX\"',
+          "publication.name": '\"dbz_pub_"$DB_NAME"_"$DB_PREFIX_INDEX"\"',
           "database.hostname": '\"$DB_HOSTNAME\"',
           "database.port": '\"$DB_PORT\"',
           "database.user": '\"$DB_USER\"',

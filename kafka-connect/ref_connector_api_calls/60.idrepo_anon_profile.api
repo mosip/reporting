@@ -29,19 +29,24 @@ curl \
           "topics": '\"$ES_INDICES\"',
           "key.ignore": "false",
           "schema.ignore": "true",
-          "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+          "key.converter": "org.apache.kafka.connect.json.JsonConverter",
           "value.converter": "org.apache.kafka.connect.json.JsonConverter",
           "key.converter.schemas.enable": "false",
           "value.converter.schemas.enable": "false",
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "ext1,ext2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,anonTransformProfile,join01,join02,tsSelect",
+          "transforms": "extValue1,extValue2,extKey1,extKey2,tsconvert01,tsconvert02,tsconvert03,stringtojson01,anonTransform,anonTransformProfile,join01,join02,tsSelect",
 
-          "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-          "transforms.ext1.field": "payload",
-          "transforms.ext2.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-          "transforms.ext2.field": "after",
+          "transforms.extValue1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.extValue1.field": "payload",
+          "transforms.extValue2.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.extValue2.field": "after",
+
+          "transforms.extKey1.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+          "transforms.extKey1.field": "payload",
+          "transforms.extKey2.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+          "transforms.extKey2.field": "id",
 
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
           "transforms.tsconvert01.field": "cr_dtimes",
