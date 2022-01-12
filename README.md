@@ -19,7 +19,7 @@ Reporting framework for real-time streaming data and visualization.
 * Run
 ```sh
 cd scripts
-./install.sh <kube-config-file>
+./install.sh [kube-config-file]
 ```
 All components will be installed in `reporting` namespace of the cluster.
 
