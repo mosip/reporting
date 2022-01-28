@@ -9,7 +9,7 @@ Reporting framework for real-time streaming data and visualization.
 
 ### Prerequisites
 
-* MOSIP cluster installed as given [here](https://github.com/mosip/mosip-infra/tree/1.2.0_v3/deployment/v3)
+* MOSIP cluster installed as given [here](https://github.com/mosip/mosip-infra/)
 * Elasticsearch and Kibana already running in the cluster.
 * Postgres installed with `extended.conf`. (MOSIP default install has this configured)
 
@@ -52,3 +52,6 @@ CAUTION: Know what you are doing!
 - For how each of these ES connections configures and uses the transforms, and how they are chained, refer to any of the file [here](kafka-connect/ref_connector_api_calls). For more info on the connectors themselves, refer [here](docs/connectors.md).
 - Side note: We have explored Spark (i.e., a method that doesn't use kafka sink connectors) to stream these kafka topics and put that data into elasticsearch manually. There are many complications this way. So currently continuing with the ES kafka connect + SMT way
 - So the custom transforms that are written, just need to be available in the docker image of the es-kafka-connector. Find the code for these transforms and more details on how to develop and build these transforms and build the es-kafka-connector docker image etc, [here](build/es-kafka-connetor).
+
+## License
+This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
