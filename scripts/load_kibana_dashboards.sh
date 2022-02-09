@@ -17,7 +17,7 @@ TO_REPLACE=${TO_REPLACE:-$INSTALL_NAME}
 
 TEMP_OBJ_FILE="/tmp/temp_kib_obj.ndjson"
 
-for file in $1/* ; do
+for file in $1/*.ndjson ; do
   cp $file $TEMP_OBJ_FILE
   sed -i.bak "s/___DB_PREFIX_INDEX___/$TO_REPLACE/g" $TEMP_OBJ_FILE  
   echo ;
