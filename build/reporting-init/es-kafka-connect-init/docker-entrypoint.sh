@@ -13,17 +13,14 @@ for dir in "${dir_list[@]}" ; do
   for file in "${conn_list[@]}" ; do
     echo -e "\n>> $file\n"
     sh -x $file
+    sleep $DELAY_BETWEEN_CONNECTORS
   done
   unset conn_list
-  sleep $DELAY_BETWEEN_CONNECTORS
 done
 
 unset dir_list
 
 # for dashboards
-
-# BIG TODO: The following lines while importing objects, the api call doesnt take care if there is a clash with previous objects with same id
-# Check if that is a problem
 
 KIB_DIR="/kibana_saved_objects"
 echo -e "\n-->> Deploying Kibana Objects from configmaps <<---\n"
