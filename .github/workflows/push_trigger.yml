@@ -59,7 +59,7 @@ jobs:
         fi
         echo IMAGE_ID=$IMAGE_ID
         echo VERSION=$VERSION
-        cd build/es-kafka-connector
+        cd build/es-kafka-connecter
         docker build . -t $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
   debezium-fixer:

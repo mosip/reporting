@@ -29,7 +29,7 @@ jobs:
 
     - name: Build with Maven
       run: |
-        cd build/es-kafka-connector
+        cd build/es-kafka-connecter
         cd kafka_connect_transforms ; mvn -B clean package -DskipTests ; cd ..
         mkdir jars; cd jars
         cp ../kafka_connect_transforms/target/kafka_connect_transforms*.jar .
@@ -51,7 +51,7 @@ jobs:
         fi
         echo IMAGE_ID=$IMAGE_ID
         echo VERSION=$VERSION
-        cd build/es-kafka-connector
+        cd build/es-kafka-connecter
         docker build . -t $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
   debezium-fixer:
