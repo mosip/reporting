@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.mosip</groupId>
-  <artifactId>the_transforms</artifactId>
-  <version>0.1.0</version>
+  <artifactId>kafka_connect_transforms</artifactId>
+  <version>1.2.1-SNAPSHOT</version>
 
-  <name>the_transforms</name>
+  <name>kafka_connect_transforms</name>
   <url>https://mosip.io</url>
 
   <properties>
