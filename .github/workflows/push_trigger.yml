@@ -1,6 +1,7 @@
 name: Create Dockers on Push
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '!release-branch'
