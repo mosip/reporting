@@ -327,8 +327,17 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         if(date == null || updatedValue.get("yearOfBirth") == null){
             return;
         }
+        Object yob = updatedValue.get("yearOfBirth");
+        int yearOfBirth;
+        if(yob instanceof Integer){
+            yearOfBirth = (int)yob;
+        } else if(yob instanceof String){
+            yearOfBirth = Integer.parseInt((String)yob);
+        } else{
+            return;
+        }
 
-        int age = Integer.parseInt(date.split("-")[0])-(int)updatedValue.get("yearOfBirth");
+        int age = Integer.parseInt(date.split("-")[0])-yearOfBirth;
         int i;
         for(i=0;i<agList.length-1;i++){
             String[] ag = agList[i].trim().split("-");

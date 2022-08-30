@@ -21,7 +21,7 @@ This docker image contains 3 components
   rm -r jars
   cd kafka_connect_transforms ; mvn clean package ; cd ..
   mkdir jars; cd jars
-  cp ../kafka_connect_transforms/target/the_transforms*.jar .
+  cp ../kafka_connect_transforms/target/kafka_connect_transforms*.jar .
   wget https://repo.maven.apache.org/maven2/io/debezium/debezium-core/1.7.0.Final/debezium-core-1.7.0.Final.jar
   cd ..
   docker build .
