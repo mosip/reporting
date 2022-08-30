@@ -8,7 +8,7 @@ fi
 
 ## Variables
 NS=reporting
-CHART_VERSION=12.0.2
+CHART_VERSION=12.0.1
 
 # Add helm repos
 echo "Adding helm repos"
