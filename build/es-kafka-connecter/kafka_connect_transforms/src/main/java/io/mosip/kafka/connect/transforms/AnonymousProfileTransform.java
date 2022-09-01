@@ -462,6 +462,14 @@ public abstract class AnonymousProfileTransform<R extends ConnectRecord<R>> impl
         if(updateValue.get("temp_latitude")==null || updateValue.get("temp_longitude")==null){
             return;
         }
+        try{
+            Double.parseDouble((String)updateValue.get("temp_latitude"));
+            Double.parseDouble((String)updateValue.get("temp_longitude"));
+        } catch(NumberFormatException nfe) {
+            System.out.println("Couldn't parse Latitude/Longitude as Numbers, while Processing Reg Center Geo Location" + nfe);
+            try{ updateValue.remove("temp_latitude"); updateValue.remove("temp_longitude"); } catch(Exception ignored){}
+            return;
+        }
 
         String ret = "";
 
