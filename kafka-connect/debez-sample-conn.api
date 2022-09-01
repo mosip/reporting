@@ -9,6 +9,7 @@
 #DB_PREFIX_INDEX=
 
 DEBEZ_CONN_URL='debezium-service:8083'; # needn't change .. this is the debezium-connector service name
+CONNECTOR_HEARTBEAT_MS='5000'; #This is in milliseconds, acts as a status check with Kafka topic.
 
 curl \
   -X POST \
@@ -30,7 +31,8 @@ curl \
           "database.password": '\"$DB_PASS\"',
           "database.dbname": '\"$DB_NAME\"',
           "database.server.name": '\"$DB_PREFIX_INDEX\"',
-          "table.include.list": '\"$DB_TABLES\"'
+          "table.include.list": '\"$DB_TABLES\"',
+          "heartbeat.interval.ms": '\"$CONNECTOR_HEARTBEAT_MS\"'
       }
 }';
 echo ;
