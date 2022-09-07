@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if [ $# -lt 1 ] ; then
   echo "Usage: ./delete_kibana_dashboards.sh <dashboards folder> [kubeconfig file]"
@@ -18,11 +18,12 @@ for file in ${1%/}/*.ndjson ; do
   echo "Loading : $file"
   IFS=$'\n' larray=($(cat $file));
   for line in "${larray[@]}"; do
-    type=$(jq -r '.type' <<< $line)
-    id=$(jq -r '.id' <<< $line)
+    type=$(echo $line | jq -r '.type')
+    id=$(echo $line | jq -r '.id')
     if [ "$type" != "null" ]; then
       echo "Deleting ${type}. id - ${id}"
-      curl -XDELETE "https://${KIBANA_URL%/}/api/saved_objects/${type}/${id}"
+      curl -XDELETE -H "kbn-xsrf: true" "https://${KIBANA_URL%/}/api/saved_objects/${type}/${id}"
+      echo ;
     fi
   done
 done
