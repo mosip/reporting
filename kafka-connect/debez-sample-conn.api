@@ -20,6 +20,7 @@ curl \
       "name": '\"$DB_NAME\"',
       "config": {
           "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+          "topic.prefix":'\"$DB_PREFIX_INDEX\"',
           "plugin.name": "pgoutput",
           "publication.autocreate.mode": "filtered",
           "slot.name": '\"debezium_"$DB_NAME"_"$DB_PREFIX_INDEX"\"',
