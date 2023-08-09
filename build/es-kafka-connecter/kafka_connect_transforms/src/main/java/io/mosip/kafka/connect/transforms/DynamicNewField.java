@@ -81,7 +81,7 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
         HttpGet hGet;
 
         ESQueryConfig(String type, String esUrl, String esIndex, String[] esInputFields, String esOutputField, String[] inputFields, String[] inputDefaultValues,String outputField, String esInputQueryAddKeyword) {
-            super(type,inputFields,inputDefaultValues,outputField,Schema.STRING_SCHEMA);
+            super(type,inputFields,inputDefaultValues,outputField,Schema.OPTIONAL_STRING_SCHEMA);
 
             this.esUrl=esUrl;
             this.esIndex=esIndex;
@@ -138,14 +138,20 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
                     else continue;
                 }
 
+                JSONObject responseSource;
                 // if(responseJson.getJSONObject("hits").getJSONArray("hits").length()!=0){
                 try{
                     // get the top hit .. error handling not done properly
-                    return responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getJSONObject("_source").getString(esOutputField);
+                    responseSource = responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getJSONObject("_source");
                 }
                 catch(JSONException je){
                     if(i==MAX_RETRIES) return "Error: No hits found";
                     else continue;
+                }
+                if(responseSource.has(esOutputField) && !responseSource.isNull(esOutputField)){
+                    return responseSource.get(esOutputField);
+                } else {
+                    return null;
                 }
             }
             // control shouldn't reach here .. it shouldve thrown exception before or returned
