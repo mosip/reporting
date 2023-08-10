@@ -74,18 +74,20 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
         String esIndex;
         String[] esInputFields;
         String esOutputField;
+        String esInputQueryAddKeyword;
 
         // RestHighLevelClient esClient;
         CloseableHttpClient hClient;
         HttpGet hGet;
 
-        ESQueryConfig(String type, String esUrl, String esIndex, String[] esInputFields, String esOutputField, String[] inputFields, String[] inputDefaultValues,String outputField) {
-            super(type,inputFields,inputDefaultValues,outputField,Schema.STRING_SCHEMA);
+        ESQueryConfig(String type, String esUrl, String esIndex, String[] esInputFields, String esOutputField, String[] inputFields, String[] inputDefaultValues,String outputField, String esInputQueryAddKeyword) {
+            super(type,inputFields,inputDefaultValues,outputField,Schema.OPTIONAL_STRING_SCHEMA);
 
             this.esUrl=esUrl;
             this.esIndex=esIndex;
             this.esInputFields=esInputFields;
             this.esOutputField=esOutputField;
+            this.esInputQueryAddKeyword=esInputQueryAddKeyword;
 
             // esClient = new RestHighLevelClient(RestClient.builder(HttpHost.create(this.esUrl)));
             hClient = HttpClients.createDefault();
@@ -105,7 +107,18 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
 
             for(int i=0; i<inputFields.length; i++){
                 if(i!=0)requestJson+=",";
-                requestJson += "{\"term\": {\"" + esInputFields[i] + ".keyword\": \"" + inputValues.get(i) + "\"}}";
+                requestJson += "{\"term\": {";
+
+                Object value = inputValues.get(i);
+
+                if(!"true".equals(this.esInputQueryAddKeyword)){
+                    requestJson += "\"" + esInputFields[i] + "\": ";
+                    requestJson += value;
+                } else {
+                    requestJson += "\"" + esInputFields[i] + ".keyword\": ";
+                    requestJson += "\"" + value + "\"";
+                }
+                requestJson += "}}";
             }
             requestJson += "]}}}";
             
@@ -125,14 +138,20 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
                     else continue;
                 }
 
+                JSONObject responseSource;
                 // if(responseJson.getJSONObject("hits").getJSONArray("hits").length()!=0){
                 try{
                     // get the top hit .. error handling not done properly
-                    return responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getJSONObject("_source").getString(esOutputField);
+                    responseSource = responseJson.getJSONObject("hits").getJSONArray("hits").getJSONObject(0).getJSONObject("_source");
                 }
                 catch(JSONException je){
                     if(i==MAX_RETRIES) return "Error: No hits found";
                     else continue;
+                }
+                if(responseSource.has(esOutputField) && !responseSource.isNull(esOutputField)){
+                    return responseSource.get(esOutputField);
+                } else {
+                    return null;
                 }
             }
             // control shouldn't reach here .. it shouldve thrown exception before or returned
@@ -243,6 +262,7 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
     public static final String INPUT_FIELDS_CONFIG = "input.fields";
     public static final String OUTPUT_FIELD_CONFIG = "output.field";
     public static final String DEFAULT_VALUE_CONFIG = "input.default.values";
+    public static final String ES_INPUT_QUERY_ADD_KEYWORD = "es.input.query.add.keyword";
 
     private Config config;
     private Cache<Schema, Schema> schemaUpdateCache;
@@ -255,7 +275,8 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
         .define(ES_OUTPUT_FIELD_CONFIG, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "If a successful match is made with the above input field+value, the value of this output field from the same document will be returned")
         .define(INPUT_FIELDS_CONFIG, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Name of the field in the current index")
         .define(OUTPUT_FIELD_CONFIG, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Name to give to the new field")
-        .define(DEFAULT_VALUE_CONFIG, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Default vlaues for input fields");
+        .define(DEFAULT_VALUE_CONFIG, ConfigDef.Type.STRING, "", ConfigDef.Importance.HIGH, "Default vlaues for input fields")
+        .define(ES_INPUT_QUERY_ADD_KEYWORD, ConfigDef.Type.STRING, "true", ConfigDef.Importance.HIGH, "Should add the .keyword suffix while querying ES?");
 
 
     @Override
@@ -274,6 +295,7 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
             String inputFieldBulk = absconf.getString(INPUT_FIELDS_CONFIG);
             String outputField = absconf.getString(OUTPUT_FIELD_CONFIG);
             String inputDefaultValuesBulk = absconf.getString(DEFAULT_VALUE_CONFIG);
+            String esInputQueryAddKeyword = absconf.getString(ES_INPUT_QUERY_ADD_KEYWORD);
 
             if(type.isEmpty() || esUrl.isEmpty() || esIndex.isEmpty() || esInputFieldBulk.isEmpty() || esOutputField.isEmpty() || inputFieldBulk.isEmpty() || outputField.isEmpty() || inputDefaultValuesBulk.isEmpty()){
                 throw new ConfigException("One of required transform config fields not set. Required field in tranforms: " + ES_URL_CONFIG + " ," + ES_INDEX_CONFIG + " ," + ES_INPUT_FIELDS_CONFIG + " ," + ES_OUTPUT_FIELD_CONFIG + " ," + INPUT_FIELDS_CONFIG + " ," + OUTPUT_FIELD_CONFIG + " ," + DEFAULT_VALUE_CONFIG);
@@ -288,7 +310,7 @@ public abstract class DynamicNewField<R extends ConnectRecord<R>> implements Tra
             }
 
             try{
-                config = new ESQueryConfig(type,esUrl,esIndex,esInputFields,esOutputField,inputFields,inputDefaultValues,outputField);
+                config = new ESQueryConfig(type,esUrl,esIndex,esInputFields,esOutputField,inputFields,inputDefaultValues,outputField,esInputQueryAddKeyword);
             }
             catch(Exception e){
                 throw new ConfigException("Can't connect to ElasticSearch. Given url : " + esUrl + " Error: " + e.getMessage());
