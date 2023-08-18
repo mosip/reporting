@@ -23,7 +23,7 @@ curl \
           "plugin.name": "pgoutput",
           "publication.autocreate.mode": "filtered",
           "slot.name": '\"debezium_"$DB_NAME"_"$DB_PREFIX_INDEX"\"',
-          "slot.drop.on.stop": "true",
+          "slot.drop.on.stop": "false",
           "publication.name": '\"dbz_pub_"$DB_NAME"_"$DB_PREFIX_INDEX"\"',
           "database.hostname": '\"$DB_HOSTNAME\"',
           "database.port": '\"$DB_PORT\"',
