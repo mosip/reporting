@@ -64,7 +64,7 @@ curl \
           "transforms.tsconvert05.input.type": "micro_sec",
 
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
-          "transforms.tsSelect.ts.order": "run_dtimes,execution_dtimes,upd_dtimes,cr_dtimes",
+          "transforms.tsSelect.ts.order": "upd_dtimes,cr_dtimes",
           "transforms.tsSelect.output.field": "@timestamp_gen"
       }
 }';
