@@ -45,6 +45,6 @@ curl \
           "transforms.debezExtract.add.fields.prefix": "source_",
 
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "source_ts_ms",
+          "transforms.tsconvert01.field": "source_ts_ms"
       }
 }';
