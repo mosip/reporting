@@ -36,7 +36,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,tsconvert01",
+          "transforms": "debezExtract,tsconvert01,tsSelect",
 
           "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
           "transforms.debezExtract.delete.handling.mode": "drop",
@@ -45,6 +45,9 @@ curl \
           "transforms.debezExtract.add.fields.prefix": "source_",
 
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "source_ts_ms"
+          "transforms.tsconvert01.field": "source_ts_ms",
+
+          "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
+          "transforms.tsSelect.output.field": "@timestamp_gen"
       }
 }';

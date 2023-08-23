@@ -27,7 +27,7 @@ curl \
           "connection.url": '\"$ES_URL\"',
           "tasks.max": "1",
           "topics": '\"$ES_INDICES\"',
-          "key.ignore": "false",
+          "key.ignore": "method_request,method_response,result_description",
           "schema.ignore": "true",
           "key.converter": "org.apache.kafka.connect.storage.StringConverter",
           "value.converter": "org.apache.kafka.connect.json.JsonConverter",
