@@ -33,7 +33,7 @@ curl \
           "database.dbname": '\"$DB_NAME\"',
           "database.server.name": '\"$DB_PREFIX_INDEX\"',
           "table.include.list": '\"$DB_TABLES\"',
-          "column.exclude.list":'\"toolkit\\.sbi_projects\\.(sbi_hash|website_url)\"',
+          "column.exclude.list":"toolkit\\.sbi_projects\\.(sbi_hash|website_url)",
           "heartbeat.interval.ms": '\"$CONNECTOR_HEARTBEAT_MS\"'
       }
 }';
