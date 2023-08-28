@@ -117,6 +117,7 @@ def mmain(app_name, kafka_serv, i_topic, batch_interval, pre_process, post_proce
     df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", kafka_serv) \
+    .option("kafka.max.request.size", 1000000000) \
     .option("groupIdPrefix", app_name) \
     .option("subscribe", i_topic) \
     .option("startingOffsets", "earliest") \
