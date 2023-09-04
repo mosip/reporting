@@ -3,6 +3,8 @@ bitnami-kafka:
   enabled: true
   zookeeper:
     enabled: true
+  kraft:
+    enabled: false
   deleteTopicEnable: true
 
 # Debezium kafka connector
