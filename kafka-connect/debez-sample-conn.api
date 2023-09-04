@@ -33,7 +33,7 @@ curl \
           "database.dbname": '\"$DB_NAME\"',
           "database.server.name": '\"$DB_PREFIX_INDEX\"',
           "table.include.list": '\"$DB_TABLES\"',
-          "column.exclude.list":"toolkit.sbi_projects.sbi_hash,toolkit.sbi_projects.website_url,toolkit.sbi_projects.device_image1,toolkit.sbi_projects.device_image2,toolkit.sbi_projects.device_image3,toolkit.sbi_projects.device_image4,toolkit.test_run_details.method_url,toolkit.test_run_details.method_request,toolkit.test_run_details.method_response",
+          "column.exclude.list":"toolkit.sbi_projects.sbi_hash,toolkit.sbi_projects.device_image1,toolkit.sbi_projects.device_image2,toolkit.sbi_projects.device_image3,toolkit.sbi_projects.device_image4,toolkit.abis_projects.username,toolkit.abis_projects.password,toolkit.abis_projects.abis_hash,toolkit.sdk_projects.sdk_hash,toolkit.test_run_details.method_url,toolkit.test_run_details.method_request,toolkit.test_run_details.method_response",
           "heartbeat.interval.ms": '\"$CONNECTOR_HEARTBEAT_MS\"'
       }
 }';
