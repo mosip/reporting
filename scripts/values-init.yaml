@@ -26,7 +26,7 @@ debezium_connectors:
   - name: "mosip_idrepo"
     tables: "idrepo.anonymous_profile,idrepo.channel_info"
   - name: "mosip_toolkit"
-    tables: "toolkit.sbi_projects,toolkit.sdk_projects,toolkit.abis_projects,toolkit.collections,toolkit.collection_testcase_mapping,toolkit.test_run,toolkit.testcase"    
+    tables: "toolkit.sbi_projects,toolkit.sdk_projects,toolkit.abis_projects,toolkit.collections,toolkit.collection_testcase_mapping,toolkit.testcase,toolkit.test_run,,toolkit.test_run_details"    
 
 es_kafka_connectors:
   enabled: true
