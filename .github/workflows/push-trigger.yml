@@ -1,0 +1,146 @@
+name: Maven Package upon a push
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message for manually triggering'
+        required: false
+        default: 'Triggered for Updates'
+        type: string
+  push:
+    branches:
+      - '!release-branch'
+      - master
+      - 1.*
+      - develop
+      - MOSIP*
+      - release*
+
+jobs:
+  build-maven-kafka-connect-transforms:
+    uses: mosip/kattu/.github/workflows/maven-build.yml@master
+    with:
+      SERVICE_LOCATION: build/es-kafka-connecter/kafka_connect_transforms
+      BUILD_ARTIFACT: kafka-connect
+    secrets:
+      OSSRH_USER: ${{ secrets.OSSRH_USER }}
+      OSSRH_SECRET: ${{ secrets.OSSRH_SECRET }}
+      OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+      GPG_SECRET: ${{ secrets.GPG_SECRET }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  ## Recreate zips to provide support for docker unzip operation
+  recreate-zips:
+    needs: build-maven-kafka-connect-transforms
+    runs-on: ubuntu-latest
+    env:
+      BUILD_ARTIFACT: kafka-connect
+      NEW_BUILD_ARTIFACT: es-kafka-connect
+      SERVICE_LOCATION: build/es-kafka-connecter/kafka_connect_transforms
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        if: ${{ ( env.BUILD_ARTIFACT != 'false' ) }}
+        with:
+          name: ${{ env.BUILD_ARTIFACT }}
+          path: ${{ env.SERVICE_LOCATION }}
+      - name: recreate zip
+        run: |
+          echo "unzip command under target directory"
+          
+          unzip -uj "${{ env.SERVICE_LOCATION }}/${{ env.BUILD_ARTIFACT }}.zip" "*/target/*"  -d "${{ env.SERVICE_LOCATION }}/target/"
+          
+          cd ${{ env.SERVICE_LOCATION }}/target/
+        
+          wget https://repo.maven.apache.org/maven2/io/debezium/debezium-core/1.7.0.Final/debezium-core-1.7.0.Final.jar
+          
+          cd -
+          echo "find command"
+          find ./ -path '*/target/*' -name '*.jar'  -type f -exec zip ${{ env.NEW_BUILD_ARTIFACT }}.zip {} +
+
+      - name: Upload the springboot jars
+        if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.NEW_BUILD_ARTIFACT }}
+          path: ${{ env.NEW_BUILD_ARTIFACT }}.zip
+
+  build-dockers-kafka-connect-transforms:
+    needs: recreate-zips
+    strategy:
+      matrix:
+        include:
+          - SERVICE_LOCATION: 'build/es-kafka-connecter/kafka_connect_transforms'
+            SERVICE_NAME: 'es-kafka-connect'
+            BUILD_ARTIFACT: 'es-kafka-connect'
+      fail-fast: false
+    name: ${{ matrix.SERVICE_NAME }}
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    with:
+      SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
+      SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
+      BUILD_ARTIFACT: ${{ matrix.BUILD_ARTIFACT }}
+    secrets:
+      DEV_NAMESPACE_DOCKER_HUB: ${{ secrets.DEV_NAMESPACE_DOCKER_HUB }}
+      ACTOR_DOCKER_HUB: ${{ secrets.ACTOR_DOCKER_HUB }}
+      RELEASE_DOCKER_HUB: ${{ secrets.RELEASE_DOCKER_HUB }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  build-dockers-debezium-fixer:
+    strategy:
+      matrix:
+        include:
+          - SERVICE_LOCATION: 'build/debezium-fixer'
+            SERVICE_NAME: 'debezium-fixer'
+      fail-fast: false
+    name: ${{ matrix.SERVICE_NAME }}
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    with:
+      SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
+      SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
+    secrets:
+      DEV_NAMESPACE_DOCKER_HUB: ${{ secrets.DEV_NAMESPACE_DOCKER_HUB }}
+      ACTOR_DOCKER_HUB: ${{ secrets.ACTOR_DOCKER_HUB }}
+      RELEASE_DOCKER_HUB: ${{ secrets.RELEASE_DOCKER_HUB }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  build-dockers-debezium-init:
+    strategy:
+      matrix:
+        include:
+          - SERVICE_LOCATION: 'build/reporting-init/debezium-init'
+            SERVICE_NAME: 'debezium-init'
+      fail-fast: false
+    name: ${{ matrix.SERVICE_NAME }}
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    with:
+      SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
+      SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
+    secrets:
+      DEV_NAMESPACE_DOCKER_HUB: ${{ secrets.DEV_NAMESPACE_DOCKER_HUB }}
+      ACTOR_DOCKER_HUB: ${{ secrets.ACTOR_DOCKER_HUB }}
+      RELEASE_DOCKER_HUB: ${{ secrets.RELEASE_DOCKER_HUB }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  build-dockers-es-connect-init:
+    strategy:
+      matrix:
+        include:
+          - SERVICE_LOCATION: 'build/reporting-init/es-kafka-connect-init'
+            SERVICE_NAME: 'es-kafka-connect-init'
+      fail-fast: false
+    name: ${{ matrix.SERVICE_NAME }}
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    with:
+      SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
+      SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
+    secrets:
+      DEV_NAMESPACE_DOCKER_HUB: ${{ secrets.DEV_NAMESPACE_DOCKER_HUB }}
+      ACTOR_DOCKER_HUB: ${{ secrets.ACTOR_DOCKER_HUB }}
+      RELEASE_DOCKER_HUB: ${{ secrets.RELEASE_DOCKER_HUB }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
