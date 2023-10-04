@@ -6,12 +6,12 @@
 #DB_PREFIX_INDEX=
 #ES_URL=
 
-CONN_NAME="toolkit_biometric_scrores_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
+CONN_NAME="toolkit_biometric_scores_$DB_PREFIX_INDEX"; # change this.. give unique name for each db/table
 
 ES_CONN_URL='es-connect:8083'; # needn't change .. this is the ES-connector service name
 
 DB_NAME='mosip_toolkit'; # change this
-DB_TABLES='toolkit.biometric_scrores'
+DB_TABLES='toolkit.biometric_scores'
 ES_INDICES=$(echo $DB_TABLES | sed -E "s/([^,]+)/$DB_PREFIX_INDEX.\1/g")
 
 curl \
