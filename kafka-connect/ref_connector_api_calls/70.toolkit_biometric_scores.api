@@ -36,13 +36,16 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,bioScoresTransform,tsconvert01,tsconvert02,tsSelect",
+          "transforms": "debezExtract,stringtojson01,tsconvert01,tsconvert02,tsSelect",
 
           "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
           "transforms.debezExtract.delete.handling.mode": "drop",
           "transforms.debezExtract.drop.tombstones": "false",
           "transforms.debezExtract.add.fields": "source.ts_ms:ts_ms,table,lsn",
           "transforms.debezExtract.add.fields.prefix": "source_",
+
+          "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
+          "transforms.stringtojson01.input.field": "scores_json",
 
           "transforms.bioScoresTransform.type": "io.mosip.kafka.connect.transforms.BiometricScoreTransform$Value",
           "transforms.bioScoresTransform.biometricscores.fields.list": "scores_json",
