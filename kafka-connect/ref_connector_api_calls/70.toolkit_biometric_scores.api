@@ -36,7 +36,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,tsconvert01,tsconvert02,tsSelect",
+          "transforms": "debezExtract,bioScoresTransform,tsconvert01,tsconvert02,tsSelect",
 
           "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
           "transforms.debezExtract.delete.handling.mode": "drop",
@@ -44,6 +44,13 @@ curl \
           "transforms.debezExtract.add.fields": "source.ts_ms:ts_ms,table,lsn",
           "transforms.debezExtract.add.fields.prefix": "source_",
 
+          "transforms.bioScoresTransform.type": "io.mosip.kafka.connect.transforms.BiometricScoreTransform$Value",
+          "transforms.bioScoresTransform.biometricscores.fields.list": "scores_json",
+          "transforms.bioScoresTransform.age.groups.list": "10-20,20-30,30-40,40-50,50-60,60-70,80+",
+          "transforms.bioScoresTransform.occupation.groups.list": "labourer,farmer,doctor",
+          "transforms.bioScoresTransform.gender.groups.list": "male,female,others",
+          "transforms.bioScoresTransform.profile.listOfFunctions": "processAgeGroup,processOccupation,processGender",
+          
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
           "transforms.tsconvert01.field": "source_ts_ms",
 
