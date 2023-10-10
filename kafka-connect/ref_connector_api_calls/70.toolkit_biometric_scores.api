@@ -32,7 +32,7 @@ curl \
           "key.converter": "org.apache.kafka.connect.storage.StringConverter",
           "value.converter": "org.apache.kafka.connect.json.JsonConverter",
           "key.converter.schemas.enable": "false",
-          "value.converter.schemas.enable": "true",
+          "value.converter.schemas.enable": "false",
 
           "behavior.on.null.values": "DELETE",
 
