@@ -36,18 +36,13 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "extValue1,extValue2,extKey1,extKey2,tsconvert01,stringtojson01,tsSelect",
+          "transforms": "ext1,ext2,tsconvert01,stringtojson01,tsSelect",
 
-          "transforms.extValue1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-          "transforms.extValue1.field": "payload",
-          "transforms.extValue2.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-          "transforms.extValue2.field": "after",
-
-          "transforms.extKey1.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-          "transforms.extKey1.field": "payload",
-          "transforms.extKey2.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-          "transforms.extKey2.field": "id",
-
+          "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.ext1.field": "payload",
+          "transforms.ext2.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+          "transforms.ext2.field": "after",
+          
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
           "transforms.tsconvert01.field": "cr_dtimes",
           "transforms.tsconvert01.input.type": "micro_sec",
