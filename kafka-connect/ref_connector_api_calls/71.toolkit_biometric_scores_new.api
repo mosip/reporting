@@ -36,7 +36,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,tsconvert01,tsSelect",
+          "transforms": "debezExtract,tsconvert01,tsconvert02,tsSelect",
 
           "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
           "transforms.debezExtract.delete.handling.mode": "drop",
@@ -45,8 +45,11 @@ curl \
           "transforms.debezExtract.add.fields.prefix": "source_",
 
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "cr_dtimes",
-          "transforms.tsconvert01.input.type": "micro_sec",
+          "transforms.tsconvert01.field": "source_ts_ms"
+
+          "transforms.tsconvert02.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
+          "transforms.tsconvert02.field": "cr_dtimes",
+          "transforms.tsconvert02.input.type": "micro_sec",
         
           "transforms.tsSelect.type": "io.mosip.kafka.connect.transforms.TimestampSelector$Value",
           "transforms.tsSelect.ts.order": "cr_dtimes",
