@@ -36,13 +36,7 @@ curl \
 
           "behavior.on.null.values": "DELETE",
 
-          "transforms": "debezExtract,ext1,ext2,tsconvert01,stringtojson01,tsSelect",
-
-          "transforms.debezExtract.type": "io.debezium.transforms.ExtractNewRecordState",
-          "transforms.debezExtract.delete.handling.mode": "drop",
-          "transforms.debezExtract.drop.tombstones": "false",
-          "transforms.debezExtract.add.fields": "source.ts_ms:ts_ms,table,lsn",
-          "transforms.debezExtract.add.fields.prefix": "source_",
+          "transforms": "ext1,ext2,tsconvert01,tsconvert02,stringtojson01,tsSelect",
 
           "transforms.ext1.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
           "transforms.ext1.field": "payload",
@@ -50,8 +44,11 @@ curl \
           "transforms.ext2.field": "after",
           
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "cr_dtimes",
-          "transforms.tsconvert01.input.type": "micro_sec",
+          "transforms.tsconvert01.field": "source_ts_ms"
+
+          "transforms.tsconvert02.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
+          "transforms.tsconvert02.field": "cr_dtimes",
+          "transforms.tsconvert02.input.type": "micro_sec",
 
           "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
           "transforms.stringtojson01.input.field": "scores_json",
