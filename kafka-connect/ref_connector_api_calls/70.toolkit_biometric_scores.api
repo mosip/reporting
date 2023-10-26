@@ -44,7 +44,7 @@ curl \
           "transforms.ext2.field": "after",
           
           "transforms.tsconvert01.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
-          "transforms.tsconvert01.field": "source_ts_ms"
+          "transforms.tsconvert01.field": "source_ts_ms",
 
           "transforms.tsconvert02.type": "io.mosip.kafka.connect.transforms.TimestampConverterAdv$Value",
           "transforms.tsconvert02.field": "cr_dtimes",
