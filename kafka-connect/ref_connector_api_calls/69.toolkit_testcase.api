@@ -47,7 +47,6 @@ curl \
           "transforms.tsconvert01.field": "source_ts_ms",
 
           "transforms.stringtojson01.type": "io.mosip.kafka.connect.transforms.StringToJson$Value",
-          "transforms.stringtojson01.input.field": "testcase_json",
-
+          "transforms.stringtojson01.input.field": "testcase_json"
       }
 }';
