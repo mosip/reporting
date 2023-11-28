@@ -1,0 +1,2 @@
+{"attributes":{"fieldAttrs":"{}","fields":"[]","runtimeFieldMap":"{}","timeFieldName":"@timestamp_gen","title":"___DB_PREFIX_INDEX___.toolkit.compliance_testrun_summary","typeMeta":"{}"},"coreMigrationVersion":"7.17.2","id":"7be2e420-8ddd-11ee-86c4-cdec8018ccbf","migrationVersion":{"index-pattern":"7.11.0"},"references":[],"type":"index-pattern","updated_at":"2023-11-28T11:01:30.082Z","version":"WzgzNjMsMV0="}
+{"excludedObjects":[],"excludedObjectsCount":0,"exportedCount":1,"missingRefCount":0,"missingReferences":[]}
