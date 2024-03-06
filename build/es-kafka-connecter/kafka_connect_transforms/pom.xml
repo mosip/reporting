@@ -30,7 +30,7 @@
     <groupId>io.mosip</groupId>
     <artifactId>kafka_connect_transforms</artifactId>
     <name>kafka_connect_transforms</name>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.0.1-SNAPSHOT</version>
     <url>https://github.com/mosip/reporting</url>
 
     <properties>
