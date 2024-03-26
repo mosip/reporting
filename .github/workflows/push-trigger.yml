@@ -80,7 +80,7 @@ jobs:
             BUILD_ARTIFACT: 'es-kafka-connect'
       fail-fast: false
     name: ${{ matrix.SERVICE_NAME }}
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
       SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
@@ -99,7 +99,7 @@ jobs:
             SERVICE_NAME: 'debezium-fixer'
       fail-fast: false
     name: ${{ matrix.SERVICE_NAME }}
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
       SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
@@ -117,7 +117,7 @@ jobs:
             SERVICE_NAME: 'debezium-init'
       fail-fast: false
     name: ${{ matrix.SERVICE_NAME }}
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
       SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
@@ -135,7 +135,7 @@ jobs:
             SERVICE_NAME: 'es-kafka-connect-init'
       fail-fast: false
     name: ${{ matrix.SERVICE_NAME }}
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: ${{ matrix.SERVICE_LOCATION }}
       SERVICE_NAME: ${{ matrix.SERVICE_NAME }}
