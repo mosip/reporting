@@ -49,6 +49,14 @@ RUN mkdir ${spark_jobs_folder} && \
     chown ${spark_uid}:${spark_uid} ${spark_jobs_folder} && \
     chown ${spark_uid}:${spark_uid} /opt/spark/.ivy2
 
+ARG container_user=mosip
+ARG container_user_group=mosip
+ARG container_user_uid=1001
+ARG container_user_gid=1001
+WORKDIR /home/${container_user}
+RUN chown -R ${container_user}:${container_user} /home/${container_user}
+USER ${container_user_uid}:${container_user_gid}
+
 USER ${spark_uid}
 
 RUN echo "print(\"JustForPrereq\")" > /tmp/prereq.py; \
