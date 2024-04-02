@@ -22,6 +22,10 @@ RUN confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:1
 ADD ./target/kafka_connect_transforms-*.jar /usr/share/java/my_transforms
 ADD ./target/debezium-core-*.jar /usr/share/java/my_transforms
 
+# Create user and group
+RUN groupadd -g ${container_user_gid} ${container_user_group} && \
+    useradd -u ${container_user_uid} -g ${container_user_group} ${container_user}
+
 WORKDIR /home/${container_user}
 
 # Change ownership of the home directory
