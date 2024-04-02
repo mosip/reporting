@@ -25,7 +25,7 @@ RUN addgroup -g ${container_user_gid} ${container_user_group} || true && \
 
 # Set working directory and permissions
 WORKDIR /home/${container_user}
-RUN chown -R ${container_user}:${container_user_group} /home/${container_user}
+RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
 USER ${container_user}:${container_user_group}
 
