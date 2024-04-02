@@ -35,5 +35,6 @@ RUN if ! getent group ${container_user} >/dev/null; then \
     fi
 
 USER ${container_user}
+USER ${container_user_uid}:${container_user_gid}
 
 CMD ["/docker-entrypoint.sh"]
