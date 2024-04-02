@@ -24,12 +24,11 @@ ADD ./target/debezium-core-*.jar /usr/share/java/my_transforms
 
 # Create user and group
 RUN groupadd -g ${container_user_gid} ${container_user_group} && \
-    useradd -u ${container_user_uid} -g ${container_user_group} ${container_user}
+    mkdir -p /home/${container_user} && \
+    chown -R ${container_user}:${container_user} /home/${container_user}
 
 WORKDIR /home/${container_user}
 
-# Change ownership of the home directory
-RUN chown -R ${container_user}:${container_user} /home/${container_user}
-
 # Switch user
+USER ${container_user}
 USER ${container_user_uid}:${container_user_gid}
