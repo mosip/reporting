@@ -21,7 +21,7 @@ ARG container_user_uid=1001
 ARG container_user_gid=1001
 
 # Change ownership of /home/mosip if it hasn't been changed yet
-RUN chown -R ${container_user_uid}:${container_user_gid} /home/${container_user}
+RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
 # Set the working directory and switch to the specified user
 WORKDIR /home/${container_user}
