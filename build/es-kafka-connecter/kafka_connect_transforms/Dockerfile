@@ -25,3 +25,4 @@ RUN id -u ${container_user} || adduser -u ${container_user_uid} -G ${container_u
 WORKDIR /home/${container_user}
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
 USER ${container_user}
+USER ${container_user_uid}:${container_user_gid}
