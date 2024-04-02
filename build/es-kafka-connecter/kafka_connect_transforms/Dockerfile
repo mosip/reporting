@@ -17,8 +17,7 @@ ARG container_user_gid=1001
 WORKDIR /home/${container_user}
 
 RUN confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.1.3 \
-&& chown -R ${container_user}:${container_user_group} /usr/share/confluent-hub-components \
-&& chown -R ${container_user}:${container_user_group} /home/${container_user}
+ && chown -R ${container_user}:${container_user} /home/${container_user}
 
 ADD ./target/kafka_connect_transforms-*.jar /usr/share/java/my_transforms
 ADD ./target/debezium-core-*.jar /usr/share/java/my_transforms
