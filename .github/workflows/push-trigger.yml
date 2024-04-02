@@ -23,7 +23,7 @@ on:
 
 jobs:
   build-maven-kafka-connect-transforms:
-    uses:abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: build/es-kafka-connecter/kafka_connect_transforms
       BUILD_ARTIFACT: kafka-connect
