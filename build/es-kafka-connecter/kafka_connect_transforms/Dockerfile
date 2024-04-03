@@ -14,12 +14,15 @@ ARG container_user_group=mosip
 ARG container_user_uid=1001
 ARG container_user_gid=1001
 
-WORKDIR /home/${container_user}
+# Create a non-root user
+RUN groupadd -g ${container_user_gid} ${container_user_group} && \
+    useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/bash -m ${container_user} && \
+    confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.1.3 && \
+    chown -R ${container_user}:${container_user_group} /home/${container_user}
 
-RUN confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.1.3 \
- && chown -R ${container_user}:${container_user} /home/${container_user}
+WORKDIR /home/${container_user}
 
 ADD ./target/kafka_connect_transforms-*.jar /usr/share/java/my_transforms
 ADD ./target/debezium-core-*.jar /usr/share/java/my_transforms
 
-USER ${container_user_uid}:${container_user_gid}
+USER ${container_user}:${container_user_group}
