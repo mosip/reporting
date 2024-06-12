@@ -27,12 +27,19 @@ All components will be installed in `reporting` namespace of the cluster.
 - NOTE: before installing, `reporting-init` debezium configuration, make sure to include all tables under that db beforehand. If one wants to add another table from the same db, it might be harder later on. (TODO: develop some script that adds additional tables under the same db)
 
 ### Upload Kibana dashboards
-Various Kibana dashboards are available in `dashboards` folder.  Upload all of them with the following script:
+Various Kibana dashboards are available in [`dashboards`](./dashboards) folder.  Upload all of them with the following script:
 ```sh
 cd scripts
-./load_kibana_dashboards.sh
+./load_kibana_dashboards.sh ../dashboards [cluster kubeconfig file]
 ```
 The dashboards may also be uploaded manually using Kibana UI.
+
+### Delete Kibana Dashboards
+Run the following script to delete previously uploaded dashboards from [`dashboards`](./dashboards) folder.
+```sh
+cd scripts
+./delete_kibana_dashboards.sh ../dashboards [cluster kubeconfig file]
+```
 
 ## Custom connectors
 Install your own connectors as given [here](docs/connectors.md)
