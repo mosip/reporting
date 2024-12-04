@@ -8,7 +8,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.6.RELEASE</version>
-         <description>Mosip Kafka Connect Transform Project</description>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -31,6 +30,7 @@
     <groupId>io.mosip</groupId>
     <artifactId>kafka_connect_transforms</artifactId>
     <name>kafka_connect_transforms</name>
+    <description>Mosip Kafka Connect Transform Project</description>
     <version>1.2.1-SNAPSHOT</version>
     <url>https://github.com/mosip/reporting</url>
 
