@@ -3,3 +3,5 @@ jars_legacy
 .idea
 target
 bin
+helm/*/Chart.lock
+helm/*/charts/

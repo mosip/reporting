@@ -33,6 +33,6 @@ kafkaClient:
   # the following is when no secret is to be used from db_pass
   db_secretref: null
 
-# Enable if you do not have Elastisearch already installed in your cluster
+# Enable if you do not have Elasticsearch already installed in your cluster
 bitnami-elasticsearch:
   enabled: false

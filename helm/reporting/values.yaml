@@ -101,9 +101,11 @@ debezium:
 kafkaClient:
   enabled: true
   image: confluentinc/cp-kafka
-  db_secretref:
-    name: postgres-postgresql
-    key: postgresql-password
+  # the following is when no secret is to be used from db_pass
+  db_secretref: null
+#  db_secretref:
+#    name: postgres-postgresql
+#    key: postgresql-password
 
 bitnami-kafka:
   fullnameOverride: kafka
@@ -111,10 +113,51 @@ bitnami-kafka:
   replicaCount: 4
   persistence:
     enabled: false
+  kraft:
+    enabled: false
+  deleteTopicEnable: true
+  livenessProbe:
+    enabled: true
+    timeoutSeconds: 5
+    failureThreshold: 5
+    periodSeconds: 10
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    failureThreshold: 6
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 60
+    successThreshold: 1
   zookeeper:
     fullnameOverride: kafka-zookeeper
     enabled: true
     replicaCount: 4
+    livenessProbe:
+      enabled: true
+      timeoutSeconds: 5
+      failureThreshold: 5
+      periodSeconds: 10
+      successThreshold: 1
+    readinessProbe:
+      enabled: true
+      failureThreshold: 6
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 30
+      successThreshold: 1
     persistence:
       enabled: false
 
@@ -170,7 +213,7 @@ confluentinc:
     customEnv: {}
 
 bitnami-elasticsearch:
-  enabled: true
+  enabled: false
   global:
     kibanaEnabled: true
   data:
