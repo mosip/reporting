@@ -8,10 +8,9 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.6.RELEASE</version>
+         <description>Mosip Kafka Connect Transform Project</description>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-        <description>Mosip Kafka Connect Transform Project</description>
-        <url>https://github.com/mosip/reporting</url>
 
     <licenses>
         <license>
