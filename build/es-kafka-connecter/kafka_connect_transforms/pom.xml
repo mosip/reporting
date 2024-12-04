@@ -10,6 +10,9 @@
         <version>2.3.6.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+         <name>MOSIP Kafka Connect Transform POM</name>
+        <description>Mosip Kafka Connect Transform Project</description>
+        <url>https://github.com/mosip/reporting</url>
 
     <licenses>
         <license>
