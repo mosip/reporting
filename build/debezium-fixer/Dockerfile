@@ -1,3 +1,8 @@
+ARG SOURCE
+ARG COMMIT_HASH
+ARG COMMIT_ID
+ARG BUILD_TIME
+
 FROM alpine:3.15.4
 
 ARG container_user=mosip
