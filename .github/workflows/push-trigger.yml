@@ -43,8 +43,8 @@ jobs:
       NEW_BUILD_ARTIFACT: es-kafka-connect
       SERVICE_LOCATION: build/es-kafka-connecter/kafka_connect_transforms
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         if: ${{ ( env.BUILD_ARTIFACT != 'false' ) }}
         with:
           name: ${{ env.BUILD_ARTIFACT }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload the springboot jars
         if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.NEW_BUILD_ARTIFACT }}
           path: ${{ env.NEW_BUILD_ARTIFACT }}.zip
