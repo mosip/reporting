@@ -1,5 +1,4 @@
-FROM confluentinc/cp-kafka-connect:7.0.0
-#FROM confluentinc/cp-kafka-connect:7.0.0-1-ubi8
+FROM confluentinc/cp-kafka-connect:7.0.0-1-ubi8
 
 ARG SOURCE
 ARG COMMIT_HASH
