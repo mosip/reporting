@@ -30,16 +30,15 @@
     <groupId>io.mosip</groupId>
     <artifactId>kafka_connect_transforms</artifactId>
     <name>kafka_connect_transforms</name>
-    <version>1.2.0.1</version>
+    <version>1.3.0-SNAPSHOT</version>
     <url>https://github.com/mosip/reporting</url>
-
+    <description>MOSIP kafka connector for data transformations</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
